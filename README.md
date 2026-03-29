@@ -1,1 +1,2 @@
 # GrosMuscles
+**GROS MUSCLES** est une application mobile permettant à tout pratiquant de musculation de suivre son évolution facilement. L'utilisateur peut paramétrer ses routines, saisir ses performances en temps réel pendant sa séance, et bénéficier d'une analyse automatisée grâce à l'Intelligence Artificielle pour optimiser sa progression (gestion du volume, détection de la fatigue, conseils d'hypertrophie).
