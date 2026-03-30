@@ -1,0 +1,9 @@
+name : course2
+
+services : 
+  game :
+    image: pengbai/docker-supermario
+    ports :
+      - "8080:80"
+
+    
