@@ -24,13 +24,37 @@ export default function App() {
     { id: 3, nom: 'Legs (Jambes complètes)' },
   ];
 
-  // Fonction pour simuler la validation et l'IA
-  const validerSeance = () => {
+// On ajoute le mot "async" car on va faire une requête réseau qui prend un peu de temps
+  const validerSeance = async () => {
     if (!duree || !fatigue) return Alert.alert("Erreur", "Précise la durée et ta fatigue");
-    let conseil = "✅ Super séance ! Le volume est parfait, continue comme ça.";
-    if (parseInt(fatigue) >= 8) conseil = "⚠️ L'IA détecte une grosse fatigue nerveuse (RPE élevé). Baisse les charges de 10% à la prochaine séance !";
-    setConseilIA(conseil);
-    setEtapeSeance(2);
+
+    // 🚨 IMPORTANT : Mets ici la VRAIE adresse IPv4 de ton ordinateur
+    const IP_PC = "10.84.64.19"; 
+
+    try {
+      // 1. Le téléphone envoie le colis de données à ton ordinateur via le Wi-Fi
+      const reponse = await fetch(`http://${IP_PC}:8000/api/seances`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_user: 1, // On met 1 par défaut pour l'instant
+          nom_seance: "Séance Libre",
+          duree_totale: parseInt(duree), // On convertit le texte en nombre
+          note_fatigue: parseInt(fatigue)
+        })
+      });
+
+      // 2. Le téléphone déballe la réponse renvoyée par ton Python
+      const donnees = await reponse.json();
+
+      // 3. On affiche le VRAI conseil de l'IA sur l'écran !
+      setConseilIA(donnees.conseil_ia);
+      setEtapeSeance(2); // On bascule sur l'écran d'Analyse IA
+
+    } catch (erreur) {
+      console.error(erreur);
+      Alert.alert("Erreur", "Impossible de joindre le PC. Vérifie l'adresse IP et le Wi-Fi !");
+    }
   };
 
   // Rendu du contenu selon l'onglet
