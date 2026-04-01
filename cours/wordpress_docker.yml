@@ -1,0 +1,37 @@
+name: course-3
+
+services:
+  wordpress:
+    container_name: wordpress_website
+    image: wordpress:latest
+    restart: always
+    volumes:
+      - ./wordpress_website_data:/var/www/html
+    ports:
+      - '8484:80'
+    depends_on:
+      - wordpress_db
+    environment:
+      - WORDPRESS_DB_HOST=wordpress_db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress_password
+      - WORDPRESS_DB_NAME=wordpress
+
+  wordpress_db:
+    container_name: wordpress_db
+    image: mariadb:10.6.4-focal
+    restart: always
+    command: '--default-authentication-plugin=mysql_native_password'
+    expose:
+      - '3306'
+    volumes:
+      - ./wordpress_website_db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=somewordpress
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress_password
+
+volumes:
+  wordpress_website_data:
+  wordpress_website_db:

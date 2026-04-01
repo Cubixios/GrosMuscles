@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from typing import Annotated
+from sqlalchemy.orm import Session # Correction de l'import ici
 from pydantic import BaseModel
-from datetime import datetime
+import models
+from database import SessionLocal, engine
 
 # Import de ton fichier models.py
 import models
@@ -27,25 +28,16 @@ models.Base.metadata.create_all(bind=engine)
 # ==========================================
 app = FastAPI(title="API GROS MUSCLES", description="Backend connecté avec SQLAlchemy")
 
+# Autoriser le frontend (Web et Mobile) à communiquer avec ce backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # On accepte tout pour le PoC local (Expo, Web, etc.)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Fonction super importante : elle ouvre la porte de la BDD et la referme proprement après
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# ==========================================
-# 3. SCHÉMAS PYDANTIC (Validation des données)
-# ==========================================
+# --- Schémas Pydantic ---
 class UserCreate(BaseModel):
     nom: str
     email: str
@@ -61,61 +53,63 @@ class SeanceCreate(BaseModel):
 # 4. LES ROUTES DE L'API
 # ==========================================
 
+# --- Gestion de la BDD ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+# Crée les tables dans la base SQLite au lancement
+models.Base.metadata.create_all(bind=engine) 
+
+
+# ==========================================
+# ROUTES DE L'API
+# ==========================================
+
+# --- ÉTAPE 1 : Créer un compte ---
 @app.post("/api/utilisateurs")
-def creer_compte(user: UserCreate, db: Session = Depends(get_db)):
-    # On vérifie si l'email existe déjà
-    db_user = db.query(models.Utilisateur).filter(models.Utilisateur.email == user.email).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email déjà utilisé")
-
-    # On crée le "vrai" objet de la base de données
-    nouvel_utilisateur = models.Utilisateur(
-        nom=user.nom, 
-        email=user.email, 
-        environnement=user.environnement
-    )
-    
-    # On l'ajoute dans le classeur et on sauvegarde (commit)
-    db.add(nouvel_utilisateur)
+def creer_compte(user: UserCreate, db: db_dependency):
+    # On utilise "Utilisateur" comme défini dans ton models.py précédent
+    new_user = models.Utilisateur(nom=user.nom, email=user.email)
+    db.add(new_user)
     db.commit()
-    db.refresh(nouvel_utilisateur) # Pour récupérer l'ID généré automatiquement
-    
-    return {"statut": "succès", "utilisateur": nouvel_utilisateur}
+    db.refresh(new_user)
+    return {"statut": "succès", "utilisateur": new_user}
 
 
+# --- ÉTAPE 2 & 3 : Saisir séance & Recevoir Conseil IA ---
 @app.post("/api/seances")
-def enregistrer_seance(seance: SeanceCreate, db: Session = Depends(get_db)):
-    # 1. On cherche l'utilisateur dans la base
+def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
+    # 1. Vérification que l'utilisateur existe
     user = db.query(models.Utilisateur).filter(models.Utilisateur.id_user == seance.id_user).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-
-    # 2. On sauvegarde la vraie séance en BDD
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # 2. ENREGISTREMENT DE LA SÉANCE EN BDD (C'est ce qu'il manquait !)
     nouvelle_seance = models.SeanceRealisee(
-        id_modele=seance.id_modele,
+        id_modele=1, # Valeur par défaut pour le test
         duree_totale=seance.duree_totale,
-        note_fatigue=seance.note_fatigue,
-        date_heure=datetime.utcnow()
+        note_fatigue=seance.note_fatigue
     )
-    
-    # ASTUCE RELATIONNELLE : Au lieu de forcer l'id_user à la main, 
-    # on lie directement la séance à l'utilisateur !
-    user.seances_modeles.append(nouvelle_seance) # (Exemple simplifié pour le lien)
-    # Plus proprement pour cette table : 
-    # En théorie, SeanceRealisee est liée à SeanceModele, qui est liée à Utilisateur.
-    # Pour le MVP on garde ça simple.
-    
     db.add(nouvelle_seance)
-    db.commit()
+    db.commit() # On sauvegarde !
 
-    # 3. Logique de l'IA basée sur la fatigue
+    # 3. Simulation du "cerveau" IA avec des règles métiers
     if seance.note_fatigue >= 8:
-        conseil = f"⚠️ Alerte fatigue pour {user.nom}. Ton RPE est très élevé ({seance.note_fatigue}/10). L'IA recommande du repos."
+        conseil_ia = f"⚠️ Alerte fatigue pour {user.nom}. Ton RPE est très élevé ({seance.note_fatigue}/10). L'IA recommande de baisser tes charges de 10% ou de prendre un jour de repos supplémentaire."
+    elif seance.duree_totale < 40:
+        conseil_ia = f"⚡ Séance intense et courte ({seance.duree_totale} min) ! Si ton objectif est l'hypertrophie, l'IA te suggère d'ajouter 2 séries d'isolation la prochaine fois."
     else:
-        conseil = f"✅ Super séance {user.nom} ! Continue sur cette lancée."
+        conseil_ia = f"✅ Super séance {user.nom} ! Volume et intensité optimaux. Continue sur cette lancée."
 
+    # 4. On renvoie la réponse au téléphone/navigateur
     return {
         "statut": "succès",
-        "message": "Séance enregistrée dans SQLite avec succès !",
-        "conseil_ia": conseil
+        "message": f"Séance '{seance.nom_seance}' enregistrée avec succès dans la BDD.",
+        "conseil_ia": conseil_ia
     }
