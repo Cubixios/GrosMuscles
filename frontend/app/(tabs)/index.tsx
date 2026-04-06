@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { validerSeanceAPI } from '../services/api';
 
 export default function App() {
   // Navigation : 'historique', 'encours', 'modeles'
@@ -23,6 +24,8 @@ export default function App() {
     { id: 2, nom: 'Pull (Dos/Biceps)' },
     { id: 3, nom: 'Legs (Jambes complètes)' },
   ];
+
+
 
 // On ajoute le mot "async" car on va faire une requête réseau qui prend un peu de temps
   const validerSeance = async () => {
