@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 from sqlalchemy.orm import Session # Correction de l'import ici
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
 import models
 from database import SessionLocal, engine

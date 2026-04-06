@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 
-// 1. On importe proprement ta fonction depuis le fichier de service
+// on import la fonction qui s'occupe de faire la requête réseau vers notre backend Python
 import { validerSeanceAPI } from '../../services/api';
 
 export default function Index() {

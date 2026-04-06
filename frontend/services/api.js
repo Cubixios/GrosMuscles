@@ -1,11 +1,16 @@
-// 1. Définition de l'URL de base (À CHANGER AVEC TON VRAIE IP LOCALE)
-// Exemple : "http://192.168.1.50:8000" ou "http://10.84.64.19:8000"
-const BASE_URL = "http://10.84.64.19:8000";
+// 1. Définition de l'URL de base (Ton IP locale)
+const BASE_URL = "http://172.20.10.2:8000";
+
+/**
+ * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne
+ * @typedef {Object} ReponseSeance
+ * @property {string} conseil_ia
+ */
 
 /**
  * Fonction pour envoyer une nouvelle séance au backend
  * @param {Object} donneesSeance - Les infos de la séance (durée, fatigue, etc.)
- * @returns {Promise<Object>} - La réponse de l'API (contenant le conseil IA)
+ * @returns {Promise<ReponseSeance>} - La réponse de l'API (contenant le conseil IA)
  */
 export const validerSeanceAPI = async (donneesSeance) => {
   try {
@@ -22,15 +27,15 @@ export const validerSeanceAPI = async (donneesSeance) => {
     }
 
     const data = await response.json();
-    return data;
+    return data; 
   } catch (error) {
     console.error("Erreur dans validerSeanceAPI :", error);
-    throw error; // On renvoie l'erreur pour que l'interface puisse afficher une alerte
+    throw error;
   }
 };
 
 /**
- * Fonction exemple pour récupérer l'historique (si ton backend a cette route)
+ * Fonction exemple pour récupérer l'historique (si tu en as besoin plus tard)
  */
 export const getHistoriqueSeances = async (userId) => {
   try {
