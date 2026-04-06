@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { validerSeanceAPI } from '../services/api';
 
-export default function App() {
+// 1. On importe proprement ta fonction depuis le fichier de service
+import { validerSeanceAPI } from '../../services/api';
+
+export default function Index() {
   // Navigation : 'historique', 'encours', 'modeles'
   const [ongletActif, setOngletActif] = useState('encours');
   
@@ -25,38 +27,28 @@ export default function App() {
     { id: 3, nom: 'Legs (Jambes complètes)' },
   ];
 
-
-
-// On ajoute le mot "async" car on va faire une requête réseau qui prend un peu de temps
+  // 2. La fonction est maintenant beaucoup plus lisible et courte !
   const validerSeance = async () => {
-    if (!duree || !fatigue) return Alert.alert("Erreur", "Précise la durée et ta fatigue");
-
-    // 🚨 IMPORTANT : Mets ici la VRAIE adresse IPv4 de ton ordinateur
-    const IP_PC = "10.84.64.19"; 
+    if (!duree || !fatigue) {
+        return Alert.alert("Erreur", "Précise la durée et ta fatigue");
+    }
 
     try {
-      // 1. Le téléphone envoie le colis de données à ton ordinateur via le Wi-Fi
-      const reponse = await fetch(`http://${IP_PC}:8000/api/seances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_user: 1, // On met 1 par défaut pour l'instant
-          nom_seance: "Séance Libre",
-          duree_totale: parseInt(duree), // On convertit le texte en nombre
-          note_fatigue: parseInt(fatigue)
-        })
+      // On délègue le travail sale (réseau, requêtes) à api.ts
+      const donnees = await validerSeanceAPI({
+        id_user: 1,
+        nom_seance: "Séance Libre",
+        duree_totale: parseInt(duree),
+        note_fatigue: parseInt(fatigue)
       });
 
-      // 2. Le téléphone déballe la réponse renvoyée par ton Python
-      const donnees = await reponse.json();
-
-      // 3. On affiche le VRAI conseil de l'IA sur l'écran !
+      // Si ça a marché, on met à jour l'interface
       setConseilIA(donnees.conseil_ia);
-      setEtapeSeance(2); // On bascule sur l'écran d'Analyse IA
+      setEtapeSeance(2); 
 
     } catch (erreur) {
-      console.error(erreur);
-      Alert.alert("Erreur", "Impossible de joindre le PC. Vérifie l'adresse IP et le Wi-Fi !");
+      // L'erreur s'affiche si api.ts a rencontré un problème
+      Alert.alert("Erreur réseau", "Impossible de joindre le serveur. Ton backend Python est-il allumé ? L'adresse IP est-elle correcte ?");
     }
   };
 
