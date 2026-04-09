@@ -25,7 +25,7 @@ cd backend/FastAPI
 pip install -r ../../requirements.txt
 
 # Lancer le serveur (l'option --host 0.0.0.0 permet d'écouter le réseau local)
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8001
 La documentation interactive de l'API sera accessible sur votre navigateur à l'adresse : http://localhost:8000/docs.
 
 

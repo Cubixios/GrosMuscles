@@ -1,5 +1,5 @@
 // 1. Définition de l'URL de base (Ton IP locale)
-const BASE_URL = "http://172.20.10.2:8000";
+const BASE_URL = "http://172.20.10.2:8001";
 
 /**
  * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne
@@ -69,7 +69,9 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
+      const erreurBody = await response.text();
+      console.error('Body renvoyé par l’API:', erreurBody);
+      throw new Error(`Erreur HTTP: ${response.status} - ${erreurBody}`);
     }
 
     const data = await response.json();

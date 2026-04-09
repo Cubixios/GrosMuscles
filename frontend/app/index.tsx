@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 // 1. On importe useRootNavigationState
 import { useLocalSearchParams, useRouter, useRootNavigationState } from 'expo-router'; 
-import { validerSeanceAPI } from '../../services/api';
+import { validerSeanceAPI } from '../services/api';
 
 export default function Index() {
   const params = useLocalSearchParams();
@@ -18,10 +18,13 @@ export default function Index() {
     // Si la navigation n'est pas encore montée/prête, on bloque l'exécution ici
     if (!rootNavigationState?.key) return;
 
-    // Une fois la navigation prête, on fait notre vérification habituelle
-    if (!idUserConnecte) {
-      router.replace('../inscription');
-    }
+    // Ajouter un petit délai pour s'assurer que la disposition racine est complètement montée
+    setTimeout(() => {
+      // Une fois la navigation prête, on fait notre vérification habituelle
+      if (!idUserConnecte) {
+        router.replace('/inscription');
+      }
+    }, 100);
   }, [idUserConnecte, rootNavigationState?.key]); // On surveille aussi l'état de la navigation
   // ---------------------------------------------------
   // ------------------------------------------

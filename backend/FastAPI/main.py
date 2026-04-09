@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session # Correction de l'import ici
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
+import datetime
 import models
 from database import SessionLocal, engine
 
@@ -42,8 +43,22 @@ app.add_middleware(
 # --- Schémas Pydantic ---
 class UserCreate(BaseModel):
     nom: str
-    email: str
+    email: str | None = None
     environnement: str = "salle complète"
+
+class UtilisateurResponse(BaseModel):
+    id_user: int
+    nom: str
+    email: str
+    environnement: str
+    date_inscription: datetime.date
+
+    class Config:
+        orm_mode = True
+
+class UserCreateResponse(BaseModel):
+    statut: str
+    utilisateur: UtilisateurResponse
 
 class SeanceCreate(BaseModel):
     id_user: int
@@ -74,10 +89,13 @@ models.Base.metadata.create_all(bind=engine)
 # ==========================================
 
 # --- ÉTAPE 1 : Créer un compte ---
-@app.post("/api/utilisateurs")
+@app.post("/api/utilisateurs", response_model=UserCreateResponse)
 def creer_compte(user: UserCreate, db: db_dependency):
+    # Générer un email par défaut si non fourni, avec un suffixe unique
+    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    email = user.email or f"{user.nom.lower().replace(' ', '')}_{suffix}@grosmuscles.com"
     # On utilise "Utilisateur" comme défini dans ton models.py précédent
-    new_user = models.Utilisateur(nom=user.nom, email=user.email)
+    new_user = models.Utilisateur(nom=user.nom, email=email, environnement=user.environnement)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
