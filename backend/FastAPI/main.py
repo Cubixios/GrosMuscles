@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 from sqlalchemy.orm import Session # Correction de l'import ici
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
 import datetime
@@ -26,6 +26,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Création magique de toutes les tables définies dans models.py !
 models.Base.metadata.create_all(bind=engine)
 
+# Assurer la présence de la colonne password sur l'ancienne base SQLite
+with engine.begin() as conn:
+    result = conn.exec_driver_sql("PRAGMA table_info(utilisateur)")
+    columns = [row[1] for row in result.fetchall()]
+    if 'password' not in columns:
+        conn.exec_driver_sql("ALTER TABLE utilisateur ADD COLUMN password VARCHAR")
+
 # ==========================================
 # 2. INITIALISATION DE FASTAPI
 # ==========================================
@@ -44,7 +51,12 @@ app.add_middleware(
 class UserCreate(BaseModel):
     nom: str
     email: str | None = None
-    environnement: str = "salle complète"
+    password: str
+    environnement: str | None = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 class CalibrationUpdate(BaseModel):
     poids: float
@@ -52,13 +64,14 @@ class CalibrationUpdate(BaseModel):
     age: int
     sexe: str
     sport_pratique: str
+    environnement: str
     objectif: str
 
 class UtilisateurResponse(BaseModel):
     id_user: int
     nom: str
     email: str
-    environnement: str
+    environnement: str | None
     poids: float | None
     taille: int | None
     age: int | None
@@ -109,11 +122,23 @@ def creer_compte(user: UserCreate, db: db_dependency):
     suffix = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     email = user.email or f"{user.nom.lower().replace(' ', '')}_{suffix}@grosmuscles.com"
     # On utilise "Utilisateur" comme défini dans ton models.py précédent
-    new_user = models.Utilisateur(nom=user.nom, email=email, environnement=user.environnement)
+    new_user = models.Utilisateur(nom=user.nom, email=email, password=user.password, environnement=user.environnement or 'salle complète')
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return {"statut": "succès", "utilisateur": new_user}
+
+
+# --- AUTHENTIFICATION ---
+@app.post("/api/login")
+def login_utilisateur(credentials: UserLogin, db: db_dependency):
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.email == credentials.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Adresse e-mail non associée à un compte.")
+    if user.password != credentials.password:
+        raise HTTPException(status_code=401, detail="Mot de passe incorrect.")
+
+    return {"statut": "succès", "utilisateur": user}
 
 
 # --- ÉTAPE 1.5 : Calibration du profil ---
@@ -129,6 +154,7 @@ def calibrer_profil(user_id: int, calibration: CalibrationUpdate, db: db_depende
     user.age = calibration.age
     user.sexe = calibration.sexe
     user.sport_pratique = calibration.sport_pratique
+    user.environnement = calibration.environnement
     user.objectif = calibration.objectif
     
     db.commit()

@@ -10,6 +10,7 @@ class Utilisateur(Base):
     id_user = Column(Integer, primary_key=True, index=True) # Clé primaire [cite: 25]
     nom = Column(String, index=True) # [cite: 26]
     email = Column(String, unique=True, index=True) # [cite: 27]
+    password = Column(String, nullable=False) # Mot de passe stocké en clair pour le PoC
     date_inscription = Column(Date, default=datetime.date.today) # [cite: 28]
     environnement = Column(String) # texte: salle complète, domicile [cite: 29, 30]
     poids = Column(Float) # Poids en kg

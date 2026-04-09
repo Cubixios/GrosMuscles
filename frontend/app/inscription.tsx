@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { creerCompteAPI } from '../services/api';
 
 export default function Inscription() {
   const [nomInscription, setNomInscription] = useState('');
   const [emailInscription, setEmailInscription] = useState('');
-  const [environnement, setEnvironnement] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
 
   const validerInscription = async () => {
     if (!nomInscription.trim()) {
       return Alert.alert("Erreur", "Veuillez entrer un nom.");
     }
-    if (!environnement.trim()) {
-      return Alert.alert("Erreur", "Veuillez sélectionner un environnement d'entraînement.");
+    if (!password.trim()) {
+      return Alert.alert("Erreur", "Veuillez créer un mot de passe.");
     }
 
     try {
@@ -23,22 +22,20 @@ export default function Inscription() {
       const reponse = await creerCompteAPI({
         nom: nomInscription,
         email: emailInscription || undefined,
-        environnement,
+        password,
       });
 
       Alert.alert("Succès", "Compte créé ! Bienvenue.");
 
-      // 2. On redirige l'utilisateur vers l'écran principal (index)
-      // On utilise "replace" (et non "push") pour qu'il ne puisse pas 
-      // faire "Retour" et revenir sur la page d'inscription par erreur.
-      // On lui passe aussi l'ID généré en paramètre !
-      router.replace({
-        pathname: '/calibration',
-        params: { idUser: reponse.utilisateur.id_user }
-      });
+      const idUser = reponse?.utilisateur?.id_user;
+      if (!idUser) {
+        throw new Error("Impossible de récupérer l'identifiant utilisateur.");
+      }
+
+      router.replace(`/calibration?idUser=${encodeURIComponent(String(idUser))}`);
 
     } catch (erreur) {
-      const message = erreur?.message || "Impossible de créer le compte.";
+      const message = erreur instanceof Error ? erreur.message : "Impossible de créer le compte.";
       Alert.alert("Erreur", message);
     }
   };
@@ -107,22 +104,18 @@ export default function Inscription() {
                 />
               </View>
             </View>
-            {/* Environnement Field */}
+            {/* Password Field */}
             <View style={styles.field}>
-              <Text style={styles.label}>Environnement d'entraînement</Text>
+              <Text style={styles.label}>Mot de passe</Text>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputIcon}>🏋️</Text>
-                <Picker
-                  selectedValue={environnement}
-                  onValueChange={(itemValue) => setEnvironnement(itemValue)}
-                  style={styles.picker}
-                  dropdownIconColor="#7c627e"
-                >
-                  <Picker.Item label="Sélectionnez un environnement" value="" />
-                  <Picker.Item label="Salle de sport" value="salle de sport" />
-                  <Picker.Item label="À la maison" value="à la maison" />
-                  <Picker.Item label="Haltères uniquement" value="Haltères uniquement" />
-                </Picker>
+                <Text style={styles.inputIcon}>🔒</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="********"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
               </View>
             </View>
             {/* CTA Button */}
@@ -148,9 +141,11 @@ export default function Inscription() {
               </TouchableOpacity>
             </View>
             {/* Login Redirect */}
-            <Text style={styles.loginText}>
-              Vous avez déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
-            </Text>
+            <TouchableOpacity onPress={() => router.replace('/login')}>
+              <Text style={styles.loginText}>
+                Vous avez déjà un compte ? <Text style={styles.loginLink}>Se connecter</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
           {/* Footer */}
           <Text style={styles.footerText}>
@@ -226,7 +221,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   headerButton: {
-    color: '#b844c7',
+    // TouchableOpacity n'accepte pas la propriété color, la couleur se gère sur le Text enfant
   },
   headerIcon: {
     fontSize: 24,

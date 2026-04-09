@@ -1,22 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
 import { calibrerProfilAPI } from '../services/api';
 
 export default function Calibration() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const userId = params.idUser;
+  const rawUserId = params.idUser ?? params.id_user ?? params.user_id;
+  const userId = Array.isArray(rawUserId) ? String(rawUserId[0]) : rawUserId ? String(rawUserId) : '';
+
+  useEffect(() => {
+    if (!userId) {
+      Alert.alert("Erreur", "ID utilisateur manquant. Veuillez vous inscrire d'abord.");
+      router.replace('/inscription');
+    }
+  }, [userId, router]);
+
+  // Si pas d'userId, ne rien afficher
+  if (!userId || userId === '') {
+    return <View style={styles.container} />;
+  }
 
   const [poids, setPoids] = useState('');
   const [taille, setTaille] = useState('');
   const [age, setAge] = useState('');
   const [sexe, setSexe] = useState('');
   const [sportPratique, setSportPratique] = useState('');
+  const [environnement, setEnvironnement] = useState('');
   const [objectif, setObjectif] = useState('Hypertrophie');
 
   const validerCalibration = async () => {
-    if (!poids || !taille || !age || !sexe || !sportPratique || !objectif) {
+    console.log('userId:', userId);
+    if (!poids || !taille || !age || !sexe || !sportPratique || !environnement || !objectif) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
@@ -28,12 +44,14 @@ export default function Calibration() {
         age: parseInt(age),
         sexe,
         sport_pratique: sportPratique,
+        environnement,
         objectif,
       });
 
       Alert.alert("Succès", "Calibration terminée !");
-      router.replace({ pathname: '/', params: { idUser } }); // Aller à la page d'accueil avec l'idUser
+      router.replace(`/?idUser=${encodeURIComponent(userId)}`); // Aller à la page d'accueil avec l'idUser
     } catch (error) {
+      console.error('Erreur lors de la calibration:', error);
       Alert.alert("Erreur", "Impossible de sauvegarder la calibration.");
     }
   };
@@ -65,7 +83,7 @@ export default function Calibration() {
             Construisez votre <Text style={styles.titleHighlight}>Moteur</Text>
           </Text>
           <Text style={styles.subtitle}>
-            Pour générer votre protocole d'entraînement optimisé par IA, nous devons calibrer votre base biométrique. La précision mène à la performance.
+            Pour générer votre protocole d&apos;entraînement optimisé par IA, nous devons calibrer votre base biométrique. La précision mène à la performance.
           </Text>
         </View>
 
@@ -159,6 +177,24 @@ export default function Calibration() {
               />
             </View>
           </View>
+
+          {/* Environnement Field */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Environnement d'entraînement</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={environnement}
+                onValueChange={(itemValue) => setEnvironnement(itemValue)}
+                style={styles.picker}
+                dropdownIconColor="#7c627e"
+              >
+                <Picker.Item label="Sélectionnez un environnement" value="" />
+                <Picker.Item label="Salle de sport" value="salle de sport" />
+                <Picker.Item label="À la maison" value="à la maison" />
+                <Picker.Item label="Haltères uniquement" value="Haltères uniquement" />
+              </Picker>
+            </View>
+          </View>
         </View>
 
         {/* Goals */}
@@ -208,7 +244,7 @@ export default function Calibration() {
             <Text style={styles.primaryButtonIcon}>➡️</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.skipButton}>
-            <Text style={styles.skipText}>Ignorer pour l'instant</Text>
+            <Text style={styles.skipText}>Ignorer pour l&apos;instant</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -260,7 +296,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   headerButton: {
-    color: '#b844c7',
+    // color removed as TouchableOpacity doesn't have color prop
   },
   headerIcon: {
     fontSize: 24,
@@ -422,6 +458,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  pickerContainer: {
+    backgroundColor: '#171a1d',
+    borderWidth: 1,
+    borderColor: 'rgba(70,72,75,0.1)',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  picker: {
+    color: '#f9f9fd',
+    height: 56,
+  },
   goalsSection: {
     marginBottom: 48,
   },
@@ -564,7 +611,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   skipButton: {
-    color: '#aaabaf',
+    // color removed as TouchableOpacity doesn't have color prop
   },
   skipText: {
     fontSize: 14,

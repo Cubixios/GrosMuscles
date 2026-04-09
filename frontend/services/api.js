@@ -1,5 +1,5 @@
 // 1. Définition de l'URL de base (Ton IP locale)
-const BASE_URL = "http://172.20.10.2:8001";
+const BASE_URL = "http://10.31.67.156:8001";
 
 /**
  * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne
@@ -49,8 +49,17 @@ export const getHistoriqueSeances = async (userId) => {
 };
 
 /**
- * @typedef {Object} ReponseInscription
+ * @typedef {Object} UtilisateurResponse
  * @property {number} id_user
+ * @property {string} nom
+ * @property {string} email
+ * @property {string} environnement
+ */
+
+/**
+ * @typedef {Object} ReponseInscription
+ * @property {string} statut
+ * @property {UtilisateurResponse} utilisateur
  */
 
 /**
@@ -78,6 +87,41 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
     return data; // Doit contenir l'id_user renvoyé par Python
   } catch (error) {
     console.error("Erreur dans creerCompteAPI :", error);
+    throw error;
+  }
+};
+
+/**
+ * @typedef {Object} ReponseConnexion
+ * @property {string} statut
+ * @property {UtilisateurResponse} utilisateur
+ */
+
+/**
+ * Fonction pour authentifier un utilisateur
+ * @param {Object} donneesConnexion - Les informations de connexion (email, password)
+ * @returns {Promise<ReponseConnexion>}
+ */
+export const loginAPI = async (donneesConnexion) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(donneesConnexion),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
+      const message = errorBody?.detail || `Erreur HTTP: ${response.status}`;
+      throw new Error(message);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erreur dans loginAPI :", error);
     throw error;
   }
 };
