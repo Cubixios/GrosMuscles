@@ -33,7 +33,7 @@ export default function Inscription() {
       // faire "Retour" et revenir sur la page d'inscription par erreur.
       // On lui passe aussi l'ID généré en paramètre !
       router.replace({
-        pathname: '/',
+        pathname: '/calibration',
         params: { idUser: reponse.utilisateur.id_user }
       });
 

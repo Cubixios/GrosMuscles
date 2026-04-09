@@ -46,15 +46,29 @@ class UserCreate(BaseModel):
     email: str | None = None
     environnement: str = "salle complète"
 
+class CalibrationUpdate(BaseModel):
+    poids: float
+    taille: int
+    age: int
+    sexe: str
+    sport_pratique: str
+    objectif: str
+
 class UtilisateurResponse(BaseModel):
     id_user: int
     nom: str
     email: str
     environnement: str
+    poids: float | None
+    taille: int | None
+    age: int | None
+    sexe: str | None
+    sport_pratique: str | None
+    objectif: str | None
     date_inscription: datetime.date
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserCreateResponse(BaseModel):
     statut: str
@@ -100,6 +114,26 @@ def creer_compte(user: UserCreate, db: db_dependency):
     db.commit()
     db.refresh(new_user)
     return {"statut": "succès", "utilisateur": new_user}
+
+
+# --- ÉTAPE 1.5 : Calibration du profil ---
+@app.put("/api/utilisateurs/{user_id}/calibration")
+def calibrer_profil(user_id: int, calibration: CalibrationUpdate, db: db_dependency):
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.id_user == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Mettre à jour les champs de calibration
+    user.poids = calibration.poids
+    user.taille = calibration.taille
+    user.age = calibration.age
+    user.sexe = calibration.sexe
+    user.sport_pratique = calibration.sport_pratique
+    user.objectif = calibration.objectif
+    
+    db.commit()
+    db.refresh(user)
+    return {"statut": "succès", "utilisateur": user}
 
 
 # --- ÉTAPE 2 & 3 : Saisir séance & Recevoir Conseil IA ---

@@ -81,3 +81,31 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
     throw error;
   }
 };
+
+/**
+ * Fonction pour calibrer le profil utilisateur
+ * @param {number} userId - ID de l'utilisateur
+ * @param {Object} donneesCalibration - Les données de calibration
+ * @returns {Promise<Object>}
+ */
+export const calibrerProfilAPI = async (userId, donneesCalibration) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/utilisateurs/${userId}/calibration`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(donneesCalibration),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erreur dans calibrerProfilAPI :", error);
+    throw error;
+  }
+};

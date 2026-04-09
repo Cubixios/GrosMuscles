@@ -12,6 +12,12 @@ class Utilisateur(Base):
     email = Column(String, unique=True, index=True) # [cite: 27]
     date_inscription = Column(Date, default=datetime.date.today) # [cite: 28]
     environnement = Column(String) # texte: salle complète, domicile [cite: 29, 30]
+    poids = Column(Float) # Poids en kg
+    taille = Column(Integer) # Taille en cm
+    age = Column(Integer) # Âge en années
+    sexe = Column(String) # Homme, Femme, Autre
+    sport_pratique = Column(String) # Sport pratiqué
+    objectif = Column(String) # Hypertrophie, Puissance, Endurance
 
     # Relations (n'existent pas dans la table BDD, mais aident la navigation en Python)
     objectifs = relationship("Objectif", back_populates="utilisateur")
