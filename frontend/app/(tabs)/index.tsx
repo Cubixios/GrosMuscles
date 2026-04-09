@@ -1,19 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-
-// on import la fonction qui s'occupe de faire la requête réseau vers notre backend Python
+// 1. On importe useRootNavigationState
+import { useLocalSearchParams, useRouter, useRootNavigationState } from 'expo-router'; 
 import { validerSeanceAPI } from '../../services/api';
 
 export default function Index() {
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  
+  // 2. On récupère l'état global de la navigation
+  const rootNavigationState = useRootNavigationState(); 
+
+  const idUserConnecte = params.idUser;
+
+  // --- LOGIQUE DE REDIRECTION AUTOMATIQUE CORRIGÉE ---
+  useEffect(() => {
+    // Si la navigation n'est pas encore montée/prête, on bloque l'exécution ici
+    if (!rootNavigationState?.key) return;
+
+    // Une fois la navigation prête, on fait notre vérification habituelle
+    if (!idUserConnecte) {
+      router.replace('../inscription');
+    }
+  }, [idUserConnecte, rootNavigationState?.key]); // On surveille aussi l'état de la navigation
+  // ---------------------------------------------------
+  // ------------------------------------------
   // Navigation : 'historique', 'encours', 'modeles'
   const [ongletActif, setOngletActif] = useState('encours');
-  
-  // États pour la séance en cours
   const [etapeSeance, setEtapeSeance] = useState(1);
   const [duree, setDuree] = useState('');
   const [fatigue, setFatigue] = useState('');
   const [conseilIA, setConseilIA] = useState('');
 
+  
+  // Sécurité : Si on n'a pas d'ID, on n'affiche rien (en attendant la redirection)
+  if (!idUserConnecte) {
+    return <View style={styles.container} />; 
+  }
   // Fausses données 
   const seancesFaites = [
     { id: 1, nom: 'Dos / Biceps', date: 'Aujourd\'hui', volume: '8 500 kg', duree: '1h15' },

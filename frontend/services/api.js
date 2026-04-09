@@ -47,3 +47,35 @@ export const getHistoriqueSeances = async (userId) => {
     throw error;
   }
 };
+
+/**
+ * @typedef {Object} ReponseInscription
+ * @property {number} id_user
+ */
+
+/**
+ * Fonction pour créer un nouvel utilisateur
+ * @param {Object} donneesUtilisateur - Les informations du formulaire (ex: nom, email)
+ * @returns {Promise<ReponseInscription>}
+ */
+export const creerCompteAPI = async (donneesUtilisateur) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/utilisateurs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(donneesUtilisateur),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data; // Doit contenir l'id_user renvoyé par Python
+  } catch (error) {
+    console.error("Erreur dans creerCompteAPI :", error);
+    throw error;
+  }
+};
