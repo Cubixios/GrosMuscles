@@ -49,7 +49,7 @@ export default function Calibration() {
       });
 
       Alert.alert("Succès", "Calibration terminée !");
-      router.replace(`/?idUser=${encodeURIComponent(userId)}`); // Aller à la page d'accueil avec l'idUser
+      router.replace(`/accueil?idUser=${encodeURIComponent(userId)}`); // Aller à la page d'accueil avec l'idUser
     } catch (error) {
       console.error('Erreur lors de la calibration:', error);
       Alert.alert("Erreur", "Impossible de sauvegarder la calibration.");

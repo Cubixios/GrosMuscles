@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { loginAPI } from '../services/api';
+import { useAuth } from './AuthContext';
 
 export default function Login() {
   const router = useRouter();
@@ -9,6 +10,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const { setUserId, setUserName } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -20,10 +23,13 @@ export default function Login() {
       setErrorMessage('');
       const response = await loginAPI({ email: email.trim().toLowerCase(), password });
       const idUser = response?.utilisateur?.id_user;
+      const nomUtilisateur = response?.utilisateur?.nom ?? null;
       if (!idUser) {
         throw new Error('Impossible de récupérer l’identifiant utilisateur.');
       }
-      router.replace(`/?idUser=${encodeURIComponent(String(idUser))}`);
+      setUserId(String(idUser));
+      setUserName(nomUtilisateur);
+      router.replace(`/accueil?idUser=${encodeURIComponent(String(idUser))}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur de connexion.';
       setErrorMessage(message);

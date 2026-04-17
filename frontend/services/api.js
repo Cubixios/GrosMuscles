@@ -1,5 +1,5 @@
 // 1. Définition de l'URL de base (Ton IP locale)
-const BASE_URL = "http://10.31.67.156:8001";
+const BASE_URL = "http://10.31.65.131:8001";
 
 /**
  * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne

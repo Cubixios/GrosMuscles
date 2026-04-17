@@ -163,9 +163,9 @@ export default function Index() {
           <Text style={[styles.navTexte, ongletActif === 'encours' && styles.navTexteActif]}>En cours</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem} onPress={() => setOngletActif('modeles')}>
-          <Text style={[styles.navIcone, ongletActif === 'modeles' && styles.navActif]}>📁</Text>
-          <Text style={[styles.navTexte, ongletActif === 'modeles' && styles.navTexteActif]}>Routines</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/routines')}>
+          <Text style={styles.navIcone}>🏋️</Text>
+          <Text style={styles.navTexte}>Entraînement</Text>
         </TouchableOpacity>
       </View>
     </View>

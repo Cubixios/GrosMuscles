@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { creerCompteAPI } from '../services/api';
+import { useAuth } from './AuthContext';
 
 export default function Inscription() {
   const [nomInscription, setNomInscription] = useState('');
   const [emailInscription, setEmailInscription] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+
+  const { setUserId, setUserName } = useAuth();
 
   const validerInscription = async () => {
     if (!nomInscription.trim()) {
@@ -28,10 +31,13 @@ export default function Inscription() {
       Alert.alert("Succès", "Compte créé ! Bienvenue.");
 
       const idUser = reponse?.utilisateur?.id_user;
+      const nomUtilisateur = reponse?.utilisateur?.nom ?? nomInscription;
       if (!idUser) {
         throw new Error("Impossible de récupérer l'identifiant utilisateur.");
       }
 
+      setUserId(String(idUser));
+      setUserName(nomUtilisateur);
       router.replace(`/calibration?idUser=${encodeURIComponent(String(idUser))}`);
 
     } catch (erreur) {
