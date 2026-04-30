@@ -32,7 +32,6 @@ export default function App() {
     const IP_PC = "10.84.64.19"; 
 
     try {
-      // 1. Le téléphone envoie le colis de données à ton ordinateur via le Wi-Fi
       const reponse = await fetch(`http://${IP_PC}:8000/api/seances`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

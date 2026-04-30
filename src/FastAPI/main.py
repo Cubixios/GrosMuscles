@@ -66,7 +66,7 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     
-    # 2. ENREGISTREMENT DE LA SÉANCE EN BDD (C'est ce qu'il manquait !)
+    # 2. ENREGISTREMENT DE LA SÉANCE EN BDD
     nouvelle_seance = models.SeanceRealisee(
         id_modele=1, # Valeur par défaut pour le test
         duree_totale=seance.duree_totale,
