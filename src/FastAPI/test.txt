@@ -1,0 +1,34 @@
+# ============================================================
+# 🚀 FASTAPI BACKEND — GUIDE DE TEST RAPIDE
+# ============================================================
+#
+# ▶ Lancer le serveur (depuis la racine du projet) :
+#    uvicorn main:app --reload
+#
+# ▶ Accès local :
+#    - API :        http://127.0.0.1:8000
+#    - Swagger UI : http://127.0.0.1:8000/docs
+#    - ReDoc :      http://127.0.0.1:8000/redoc
+#
+# ▶ Tester les endpoints :
+#    1. Via Swagger (recommandé)
+#       → Ouvrir /docs, sélectionner une route, cliquer sur "Try it out"
+#
+#    2. Via curl (exemples)
+#       GET :
+#         curl http://127.0.0.1:8000/endpoint
+#
+#       POST :
+#         curl -X POST http://127.0.0.1:8000/endpoint \
+#         -H "Content-Type: application/json" \
+#         -d '{"key": "value"}'
+#
+#    3. Via client API (optionnel)
+#       → Postman / Insomnia
+#
+# ▶ Important :
+#    - Adapter "main:app" si fichier ou instance différents
+#    - Vérifier que le serveur tourne avant de tester
+#    - Les erreurs apparaissent dans le terminal
+#
+# ============================================================
