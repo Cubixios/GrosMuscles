@@ -22,12 +22,13 @@ app.add_middleware(
 class UserCreate(BaseModel):
     nom: str
     email: str
+    environnement: str = "salle complète"
 
 class SeanceCreate(BaseModel):
     id_user: int
-    nom_seance: str
-    duree_totale: int # en minutes
-    note_fatigue: int # de 1 à 10 (RPE)
+    id_modele: int = 1 # Par défaut pour le test
+    duree_totale: int
+    note_fatigue: int
 
 # --- Gestion de la BDD ---
 def get_db():
