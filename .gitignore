@@ -67,3 +67,22 @@ env/
 .venv/
 env.bak/
 venv.bak/
+
+# api keys
+API_KEY : sk-358050f1e90742689e65e553a640f711
+API_URL : https://chat.kube.soluce-technologies.com
+API_MODEL: icam-challenge
+
+
+curl -X POST https://chat.kube.soluce-technologies.com\
+-H "Authorization: Bearer YOUR_API_KEY" \
+-H "Content-Type: application/json" \
+-d '{
+"model": "YOUR_MODEL",
+"messages": [
+{
+"role": "user",
+"content": "Why is the sky blue?"
+}
+]
+}'
