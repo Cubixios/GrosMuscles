@@ -93,6 +93,16 @@ class SeanceCreate(BaseModel):
     duree_totale: int
     note_fatigue: int
 
+class SeanceResponse(BaseModel):
+    id_realise: int
+    nom_seance: str
+    date_heure: datetime.datetime
+    duree_totale: int
+    note_fatigue: int
+
+    class Config:
+        from_attributes = True
+
 # ==========================================
 # 4. LES ROUTES DE L'API
 # ==========================================
@@ -193,3 +203,36 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
         "message": f"Séance '{seance.nom_seance}' enregistrée avec succès dans la BDD.",
         "conseil_ia": conseil_ia
     }
+
+
+# --- RÉCUPÉRER L'HISTORIQUE DES SÉANCES D'UN UTILISATEUR ---
+@app.get("/api/seances/{id_user}", response_model=list[SeanceResponse])
+def get_seances_utilisateur(id_user: int, db: db_dependency):
+    """
+    Récupère toutes les séances réalisées pour un utilisateur
+    """
+    # Vérifier que l'utilisateur existe
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.id_user == id_user).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Récupérer toutes les séances réalisées de cet utilisateur
+    # via la relation avec SeanceModele
+    seances = db.query(models.SeanceRealisee).join(
+        models.SeanceModele
+    ).filter(
+        models.SeanceModele.id_user == id_user
+    ).order_by(models.SeanceRealisee.date_heure.desc()).all()
+    
+    # Transformer les résultats pour inclure le nom de la séance
+    resultat = []
+    for seance in seances:
+        resultat.append({
+            "id_realise": seance.id_realise,
+            "nom_seance": seance.seance_modele.nom_seance,
+            "date_heure": seance.date_heure,
+            "duree_totale": seance.duree_totale,
+            "note_fatigue": seance.note_fatigue
+        })
+    
+    return resultat

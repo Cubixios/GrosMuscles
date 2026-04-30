@@ -7,10 +7,13 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
+  FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useRootNavigationState } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAuth } from './AuthContext';
+import { useAuth } from './_lib/AuthContext';
+import { getSeancesUtilisateur } from '../services/api';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
@@ -25,6 +28,54 @@ export default function Accueil() {
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const { userId, setUserId } = useAuth();
+  const [seances, setSeances] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Charger les séances au montage du composant ou quand userId change
+  useEffect(() => {
+    if (userId) {
+      chargerSeances();
+    }
+  }, [userId]);
+
+  const chargerSeances = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getSeancesUtilisateur(parseInt(userId));
+      setSeances(data);
+    } catch (err) {
+      console.error('Erreur lors du chargement des séances:', err);
+      setError('Erreur lors du chargement des séances');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Formater la date pour l'affichage
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Aujourd'hui";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Hier';
+    } else {
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    }
+  };
+
+  // Formater la durée en heures/minutes
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) return `${minutes}min`;
+    const heures = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${heures}h${mins}` : `${heures}h`;
+  };
 
   useEffect(() => {
     if (!rootNavigationState?.key) return;
@@ -45,29 +96,32 @@ export default function Accueil() {
     return <View style={styles.container} />;
   }
 
-  const seancesFaites = [
-    {
-      id: 1,
-      nom: 'Dos / Biceps',
-      date: 'Aujourd\'hui',
-      volume: '8 500 kg',
-      duree: '1h15',
-    },
-    {
-      id: 2,
-      nom: 'Jambes (Focus Quad)',
-      date: '27 Mars',
-      volume: '12 200 kg',
-      duree: '1h30',
-    },
-    {
-      id: 3,
-      nom: 'Pectoraux / Triceps',
-      date: '25 Mars',
-      volume: '7 800 kg',
-      duree: '1h10',
-    },
-  ];
+  // Composant pour afficher une seule séance dans la FlatList
+  const renderSeanceCard = ({ item }: { item: any }) => (
+    <TouchableOpacity style={styles.sessionCard}>
+      <View style={styles.sessionLeft}>
+        <View style={styles.sessionIconContainer}>
+          <MaterialCommunityIcons
+            name="dumbbell"
+            size={20}
+            color={PURPLE}
+          />
+        </View>
+        <View>
+          <Text style={styles.sessionName}>{item.nom_seance}</Text>
+          <Text style={styles.sessionDate}>{formatDate(item.date_heure)}</Text>
+        </View>
+      </View>
+      <View style={styles.sessionStats}>
+        <View style={styles.statBadge}>
+          <Text style={styles.statBadgeText}>⏱ {formatDuration(item.duree_totale)}</Text>
+        </View>
+        <View style={styles.statBadge}>
+          <Text style={styles.statBadgeText}>💪 Fatigue: {item.note_fatigue}/10</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -112,7 +166,7 @@ export default function Accueil() {
         {/* Stats Overview */}
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{seances.length}</Text>
             <Text style={styles.statLabel}>Séances</Text>
           </View>
           <View style={styles.statBox}>
@@ -125,34 +179,50 @@ export default function Accueil() {
           </View>
         </View>
 
-        {/* Recent Sessions */}
+        {/* Recent Sessions Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Séances Récentes</Text>
-          {seancesFaites.map((seance) => (
-            <TouchableOpacity key={seance.id} style={styles.sessionCard}>
-              <View style={styles.sessionLeft}>
-                <View style={styles.sessionIconContainer}>
-                  <MaterialCommunityIcons
-                    name="dumbbell"
-                    size={20}
-                    color={PURPLE}
-                  />
-                </View>
-                <View>
-                  <Text style={styles.sessionName}>{seance.nom}</Text>
-                  <Text style={styles.sessionDate}>{seance.date}</Text>
-                </View>
-              </View>
-              <View style={styles.sessionStats}>
-                <View style={styles.statBadge}>
-                  <Text style={styles.statBadgeText}>⏱ {seance.duree}</Text>
-                </View>
-                <View style={styles.statBadge}>
-                  <Text style={styles.statBadgeText}>🏋️ {seance.volume}</Text>
-                </View>
-              </View>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Séances Récentes</Text>
+            <TouchableOpacity onPress={chargerSeances}>
+              <MaterialCommunityIcons
+                name="refresh"
+                size={20}
+                color={PURPLE}
+              />
             </TouchableOpacity>
-          ))}
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color={PURPLE} style={{ marginVertical: 20 }} />
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity 
+                style={styles.retryButton}
+                onPress={chargerSeances}
+              >
+                <Text style={styles.retryButtonText}>Réessayer</Text>
+              </TouchableOpacity>
+            </View>
+          ) : seances.length > 0 ? (
+            <FlatList
+              data={seances}
+              renderItem={renderSeanceCard}
+              keyExtractor={(item) => item.id_realise.toString()}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          ) : (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="dumbbell"
+                size={48}
+                color={TEXT_SECONDARY}
+              />
+              <Text style={styles.emptyText}>Aucune séance enregistrée</Text>
+              <Text style={styles.emptySubText}>Commence ta première séance!</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.spacer} />
@@ -285,11 +355,16 @@ const styles = StyleSheet.create({
   sectionContainer: {
     marginBottom: 16,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: TEXT_PRIMARY,
-    marginBottom: 12,
   },
   sessionCard: {
     backgroundColor: SURFACE_CONTAINER,
@@ -343,6 +418,43 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: TEXT_PRIMARY,
     fontWeight: '600',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: PURPLE,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: TEXT_PRIMARY,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    color: TEXT_PRIMARY,
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 12,
+  },
+  emptySubText: {
+    color: TEXT_SECONDARY,
+    fontSize: 13,
+    marginTop: 4,
   },
   spacer: {
     height: 80,

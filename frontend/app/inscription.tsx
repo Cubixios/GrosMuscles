@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { creerCompteAPI } from '../services/api';
-import { useAuth } from './AuthContext';
+import { useAuth } from './_lib/AuthContext';
 
 export default function Inscription() {
   const [nomInscription, setNomInscription] = useState('');
@@ -159,25 +159,6 @@ export default function Inscription() {
           </Text>
         </View>
       </View>
-      {/* Bottom Nav - approximate */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navText}>Accueil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏋️</Text>
-          <Text style={styles.navText}>Séances</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📊</Text>
-          <Text style={styles.navText}>Analyses</Text>
-        </TouchableOpacity>
-        <View style={styles.navItemActive}>
-          <Text style={styles.navIconActive}>👤</Text>
-          <Text style={styles.navTextActive}>Profil</Text>
-        </View>
-      </View>
     </ScrollView>
   );
 }
@@ -268,32 +249,32 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '12deg' }],
   },
   main: {
-    paddingTop: 160,
-    paddingBottom: 160,
-    paddingHorizontal: 24,
+    paddingTop: 100,
+    paddingBottom: 60,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   branding: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: '900',
     textAlign: 'center',
     color: '#f9f9fd',
-    marginBottom: 24,
+    marginBottom: 18,
     textTransform: 'uppercase',
   },
   titleHighlight: {
     color: '#b844c7',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#b89ebc',
     textAlign: 'center',
-    maxWidth: 400,
-    lineHeight: 28,
+    maxWidth: 360,
+    lineHeight: 24,
   },
   formContainer: {
     width: '100%',
@@ -301,8 +282,8 @@ const styles = StyleSheet.create({
   },
   form: {
     backgroundColor: 'rgba(26,8,29,0.4)',
-    padding: 32,
-    borderRadius: 32,
+    padding: 24,
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: 'rgba(74,51,77,0.15)',
     shadowColor: '#b844c7',
@@ -356,13 +337,13 @@ const styles = StyleSheet.create({
   },
   ctaButton: {
     backgroundColor: '#b844c7',
-    paddingVertical: 20,
+    paddingVertical: 16,
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 8,
-    marginTop: 20,
+    marginTop: 18,
   },
   ctaText: {
     color: '#ffffff',
@@ -377,7 +358,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: 24,
   },
   dividerLine: {
     flex: 1,
@@ -423,7 +404,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     color: '#b89ebc',
-    marginTop: 32,
+    marginTop: 24,
   },
   loginLink: {
     color: '#b844c7',
@@ -438,64 +419,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     lineHeight: 16,
     opacity: 0.6,
-    marginTop: 32,
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-    paddingTop: 12,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 10,
-  },
-  navItem: {
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-  },
-  navIcon: {
-    fontSize: 24,
-    color: '#6b7280',
-  },
-  navText: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    color: '#6b7280',
-    marginTop: 4,
-  },
-  navItemActive: {
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(184,68,199,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(184,68,199,0.2)',
-    borderRadius: 12,
-  },
-  navIconActive: {
-    fontSize: 24,
-    color: '#b844c7',
-  },
-  navTextActive: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    color: '#b844c7',
-    marginTop: 4,
+    marginTop: 24,
   },
 });

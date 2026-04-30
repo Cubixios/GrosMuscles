@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSession } from './_lib/SessionContext';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
@@ -47,13 +48,50 @@ export default function Routines() {
     },
   ]);
 
+  const { setCurrentSession } = useSession();
+
   const handleCreateRoutine = () => {
-    // Naviguer vers la page de création de routine
-    Alert.alert('Créer une nouvelle routine', 'Navigation vers la page de création');
+    router.push('/nouvelle-seance');
   };
 
   const handleStartRoutine = (routine: any) => {
-    Alert.alert('Démarrer la routine', `Vous avez sélectionné: ${routine.name}`);
+    const standardExercises = [
+      {
+        id: 'bench-press',
+        name: 'Développé Couché',
+        group: 'Pecs • Barre',
+        sets: 4,
+        reps: 8,
+        weight: '80 kg',
+        image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80',
+      },
+      {
+        id: 'squat',
+        name: 'Squat Arrière',
+        group: 'Jambes • Barre',
+        sets: 4,
+        reps: 8,
+        weight: '100 kg',
+        image: 'https://images.unsplash.com/photo-1558611848-73f7eb4001d0?auto=format&fit=crop&w=400&q=80',
+      },
+      {
+        id: 'pullups',
+        name: 'Tractions',
+        group: 'Dos • Poids du corps',
+        sets: 3,
+        reps: 8,
+        weight: 'Corps',
+        image: 'https://images.unsplash.com/photo-1517964603305-6ef132a6e2f9?auto=format&fit=crop&w=400&q=80',
+      },
+    ];
+
+    setCurrentSession({
+      name: routine.name,
+      exercises: standardExercises,
+      createdAt: new Date().toISOString(),
+    });
+
+    router.push('/seance-en-cours');
   };
 
   const handleEditRoutine = (routine: any) => {

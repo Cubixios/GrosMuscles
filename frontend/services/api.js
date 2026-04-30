@@ -1,5 +1,5 @@
 // 1. Définition de l'URL de base (Ton IP locale)
-const BASE_URL = "http://10.31.65.131:8001";
+const BASE_URL = "http://10.31.66.9:8001";
 
 /**
  * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne
@@ -44,6 +44,25 @@ export const getHistoriqueSeances = async (userId) => {
     return await response.json();
   } catch (error) {
     console.error("Erreur dans getHistorique :", error);
+    throw error;
+  }
+};
+
+/**
+ * Fonction pour récupérer les séances d'un utilisateur
+ * @param {number} userId - L'ID de l'utilisateur
+ * @returns {Promise<Array>} - Tableau des séances réalisées
+ */
+export const getSeancesUtilisateur = async (userId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/seances/${userId}`);
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erreur dans getSeancesUtilisateur :", error);
     throw error;
   }
 };
