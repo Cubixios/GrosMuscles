@@ -16,7 +16,7 @@ export default function SeanceEnCours() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const exercises = currentSession?.exercises ?? [];
 
   // Timer logic
