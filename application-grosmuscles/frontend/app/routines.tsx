@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSession } from './_lib/SessionContext';
+import { useSession } from '../lib/SessionContext';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
@@ -64,6 +64,13 @@ export default function Routines() {
         reps: 8,
         weight: '80 kg',
         image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80',
+        icon: '🏋️',
+        series: [
+          { id: 's1', reps: 8, weight: '80 kg', restTime: 90 },
+          { id: 's2', reps: 8, weight: '80 kg', restTime: 90 },
+          { id: 's3', reps: 8, weight: '80 kg', restTime: 90 },
+          { id: 's4', reps: 8, weight: '80 kg', restTime: 90 },
+        ],
       },
       {
         id: 'squat',
@@ -73,6 +80,13 @@ export default function Routines() {
         reps: 8,
         weight: '100 kg',
         image: 'https://images.unsplash.com/photo-1558611848-73f7eb4001d0?auto=format&fit=crop&w=400&q=80',
+        icon: '🏋️‍♂️',
+        series: [
+          { id: 's1', reps: 8, weight: '100 kg', restTime: 120 },
+          { id: 's2', reps: 8, weight: '100 kg', restTime: 120 },
+          { id: 's3', reps: 8, weight: '100 kg', restTime: 120 },
+          { id: 's4', reps: 8, weight: '100 kg', restTime: 120 },
+        ],
       },
       {
         id: 'pullups',
@@ -82,6 +96,12 @@ export default function Routines() {
         reps: 8,
         weight: 'Corps',
         image: 'https://images.unsplash.com/photo-1517964603305-6ef132a6e2f9?auto=format&fit=crop&w=400&q=80',
+        icon: '💪',
+        series: [
+          { id: 's1', reps: 8, weight: 'Corps', restTime: 90 },
+          { id: 's2', reps: 8, weight: 'Corps', restTime: 90 },
+          { id: 's3', reps: 8, weight: 'Corps', restTime: 90 },
+        ],
       },
     ];
 

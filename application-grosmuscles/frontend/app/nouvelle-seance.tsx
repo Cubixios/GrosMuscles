@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Image, SafeAreaView, Alert, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSession, Exercise, Serie } from './_lib/SessionContext';
+import { useSession, Exercise, Serie } from '../lib/SessionContext';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';

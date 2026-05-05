@@ -1,9 +1,28 @@
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 // Définition de l'URL de base pour le backend FastAPI local
-// - 127.0.0.1:8000 est la valeur standard pour uvicorn local
-// - 10.0.2.2 est nécessaire pour Android Emulator sur Windows
-const BACKEND_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
+// - 127.0.0.1:8000 est utilisé pour le web et les simulateurs
+// - 10.0.2.2:8000 est utilisé pour l'émulateur Android sur Windows
+// - 192.168.56.1:8000 est ton PC sur le réseau local pour un appareil physique
+const LOCALHOST = '127.0.0.1';
+const ANDROID_EMULATOR = '10.0.2.2';
+const PHYSICAL_DEVICE_HOST = '192.168.56.1';
+
+const manifest = Constants.manifest || Constants.expoConfig || {};
+const debuggerHost = typeof manifest.debuggerHost === 'string' ? manifest.debuggerHost.split(':')[0] : null;
+const hostFromManifest = debuggerHost || null;
+
+const BACKEND_HOST = Platform.OS === 'web'
+  ? LOCALHOST
+  : hostFromManifest
+    ? hostFromManifest
+    : Platform.OS === 'android'
+      ? Constants.isDevice ? PHYSICAL_DEVICE_HOST : ANDROID_EMULATOR
+      : Constants.isDevice
+        ? PHYSICAL_DEVICE_HOST
+        : LOCALHOST;
+
 const BACKEND_PORT = 8000;
 const BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
@@ -153,7 +172,7 @@ export const loginAPI = async (donneesConnexion) => {
 
 /**
  * Fonction pour calibrer le profil utilisateur
- * @param {number} userId - ID de l'utilisateur
+ * @param {string|number} userId - ID de l'utilisateur
  * @param {Object} donneesCalibration - Les données de calibration
  * @returns {Promise<Object>}
  */

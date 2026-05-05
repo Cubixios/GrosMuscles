@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { creerCompteAPI } from '../services/api';
-import { useAuth } from './_lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 
 export default function Inscription() {
   const [nomInscription, setNomInscription] = useState('');

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSession } from './_lib/SessionContext';
+import { useSession } from '../lib/SessionContext';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
@@ -16,7 +16,7 @@ export default function SeanceEnCours() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const exercises = currentSession?.exercises ?? [];
 
   // Timer logic

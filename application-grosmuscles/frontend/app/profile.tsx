@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAuth } from './_lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';

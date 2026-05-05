@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useRootNavigationState } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAuth } from './_lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 import { getSeancesUtilisateur } from '../services/api';
 
 const PURPLE = '#b844c7';
@@ -35,21 +35,27 @@ export default function Accueil() {
   // Charger les séances au montage du composant ou quand userId change
   useEffect(() => {
     if (userId) {
-      chargerSeances();
+      chargerSeances(userId);
     }
   }, [userId]);
 
-  const chargerSeances = async () => {
+  const chargerSeances = async (uid: string) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getSeancesUtilisateur(parseInt(userId));
+      const data = await getSeancesUtilisateur(parseInt(uid, 10));
       setSeances(data);
     } catch (err) {
       console.error('Erreur lors du chargement des séances:', err);
       setError('Erreur lors du chargement des séances');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefreshPress = () => {
+    if (userId) {
+      chargerSeances(userId);
     }
   };
 
@@ -183,7 +189,7 @@ export default function Accueil() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Séances Récentes</Text>
-            <TouchableOpacity onPress={chargerSeances}>
+            <TouchableOpacity onPress={handleRefreshPress}>
               <MaterialCommunityIcons
                 name="refresh"
                 size={20}
@@ -199,7 +205,7 @@ export default function Accueil() {
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity 
                 style={styles.retryButton}
-                onPress={chargerSeances}
+                onPress={handleRefreshPress}
               >
                 <Text style={styles.retryButtonText}>Réessayer</Text>
               </TouchableOpacity>
