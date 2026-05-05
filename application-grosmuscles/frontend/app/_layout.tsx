@@ -1,44 +1,49 @@
 import React, { useEffect } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '../lib/AuthContext';
-import { SessionProvider } from '../lib/SessionContext'; // Assure-toi que ce fichier existe et exporte SessionProvider
+import { SessionProvider } from '../lib/SessionContext';
 
-const InitialLayout = () => {
+/**
+ * Ce composant est le gardien de l'application.
+ * Il gère la redirection en fonction de l'état d'authentification.
+ */
+function RootLayoutNav() {
   const { userId, isLoaded } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    // Si l'état d'authentification n'est pas encore chargé, on ne fait rien.
+    // On attend que le contexte d'authentification soit chargé.
     if (!isLoaded) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const inAuthGroup = segments.length > 0 && ['inscription', 'login', 'calibration'].includes(segments[0]);
 
     if (userId && inAuthGroup) {
-      // L'utilisateur est connecté mais se trouve sur une page d'authentification (login, inscription...).
-      // On le redirige vers la page d'accueil de l'application.
+      // L'utilisateur est connecté mais sur une page d'authentification.
+      // On le redirige vers la page d'accueil.
       router.replace('/');
     } else if (!userId && !inAuthGroup) {
-      // L'utilisateur n'est pas connecté et essaie d'accéder à une page protégée.
-      // On le redirige vers la page d'inscription.
+      // L'utilisateur n'est pas connecté et tente d'accéder à une page protégée.
+      // On le redirige vers l'inscription.
       router.replace('/inscription');
     }
   }, [userId, isLoaded, segments, router]);
 
-  // Affiche un écran vide pendant que l'on vérifie l'authentification
+  // Si le contexte n'est pas encore chargé, on n'affiche rien pour éviter les erreurs.
   if (!isLoaded) {
     return null;
   }
 
+  // Affiche la page actuelle.
   return <Slot />;
-};
+}
 
 export default function RootLayout() {
   return (
-    <SessionProvider> {/* Ajouté pour englober l'application si tu as un SessionContext */}
-      <AuthProvider>
-        <InitialLayout />
-      </AuthProvider>
-    </SessionProvider>
+    <AuthProvider>
+      <SessionProvider>
+        <RootLayoutNav />
+      </SessionProvider>
+    </AuthProvider>
   );
 }

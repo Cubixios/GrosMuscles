@@ -1,63 +1,53 @@
 import React, { createContext, useContext, useState } from 'react';
 
-export interface Serie {
+// Définis les types pour tes exercices et séries.
+// Voici un exemple de structure, tu devras l'adapter à tes besoins réels.
+interface Serie {
   id: string;
   reps: number;
-  weight: string;
-  restTime: number; // en secondes
+  weight: number;
+  restTime: number;
 }
 
-export interface Exercise {
+interface Exercise {
   id: string;
   name: string;
   group: string;
-  series: Serie[];
   image: string;
-  icon: string;
+  icon?: string; // Ajout de la propriété icon (optionnelle)
+  series: Serie[];
 }
 
-export interface SessionData {
+interface CurrentSession {
+  id: string;
   name: string;
   exercises: Exercise[];
-  createdAt: string;
-  startedAt?: string;
+  createdAt: string; // Ajout de la propriété createdAt
 }
 
 interface SessionContextType {
-  currentSession: SessionData | null;
-  setCurrentSession: (session: SessionData) => void;
-  updateSession: (session: SessionData) => void;
+  currentSession: CurrentSession | null;
+  setCurrentSession: (session: CurrentSession | null) => void;
   clearSession: () => void;
 }
 
-const SessionContext = createContext<SessionContextType | undefined>(undefined);
+export const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [currentSession, setCurrentSessionState] = useState<SessionData | null>(null);
-
-  const setCurrentSession = (session: SessionData) => {
-    setCurrentSessionState({
-      ...session,
-      startedAt: new Date().toISOString(),
-    });
-  };
-
-  const updateSession = (session: SessionData) => {
-    setCurrentSessionState(session);
-  };
+  const [currentSession, setCurrentSession] = useState<CurrentSession | null>(null);
 
   const clearSession = () => {
-    setCurrentSessionState(null);
+    setCurrentSession(null);
   };
 
   return (
-    <SessionContext.Provider value={{ currentSession, setCurrentSession, updateSession, clearSession }}>
+    <SessionContext.Provider value={{ currentSession, setCurrentSession, clearSession }}>
       {children}
     </SessionContext.Provider>
   );
 }
 
-export function useSession() {
+export function useSession(): SessionContextType {
   const context = useContext(SessionContext);
   if (context === undefined) {
     throw new Error('useSession must be used within a SessionProvider');

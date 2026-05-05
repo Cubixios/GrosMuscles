@@ -150,7 +150,7 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
     
     # 2. ENREGISTREMENT DE LA SÉANCE EN BDD
     nouvelle_seance = models.SeanceRealisee(
-        id_user=seance.id_user, # <-- LIGNE CRITIQUE MANQUANTE
+        id_user=seance.id_user,
         id_modele=1, # Valeur par défaut pour le test
         duree_totale=seance.duree_totale,
         note_fatigue=seance.note_fatigue

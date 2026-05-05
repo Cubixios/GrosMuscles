@@ -114,6 +114,7 @@ class SeanceRealisee(Base):
 
     id_realise = Column(Integer, primary_key=True, index=True) # [cite: 57]
     id_modele = Column(Integer, ForeignKey("seance_modele.id_modele")) # [cite: 58]
+    id_user = Column(Integer, ForeignKey("utilisateur.id_user"), nullable=False)
     date_heure = Column(DateTime, default=datetime.datetime.utcnow) # [cite: 59]
     duree_totale = Column(Integer) # en minutes [cite: 60]
     note_fatigue = Column(Integer) # [cite: 61]
@@ -152,4 +153,3 @@ class ConseilIA(Base):
     id_exercice = Column(Integer, ForeignKey("exercice.id_exercice"), nullable=True) # [cite: 33]
     date_genere = Column(DateTime, default=datetime.datetime.utcnow) # [cite: 33]
     message_analyse = Column(Text) # [cite: 33]
-

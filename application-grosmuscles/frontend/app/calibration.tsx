@@ -243,7 +243,7 @@ export default function Calibration() {
             <Text style={styles.primaryButtonText}>Étape suivante</Text>
             <Text style={styles.primaryButtonIcon}>➡️</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.skipButton}>
+          <TouchableOpacity style={styles.skipButton} onPress={() => router.replace('/')}>
             <Text style={styles.skipText}>Ignorer pour l&apos;instant</Text>
           </TouchableOpacity>
         </View>
