@@ -113,6 +113,7 @@ export const getSeancesUtilisateur = async (userId) => {
  */
 export const creerCompteAPI = async (donneesUtilisateur) => {
   try {
+    console.warn('[API] creerCompteAPI calling with BASE_URL:', BASE_URL);
     const response = await fetch(`${BASE_URL}/api/utilisateurs`, {
       method: 'POST',
       headers: {
@@ -120,6 +121,7 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
       },
       body: JSON.stringify(donneesUtilisateur),
     });
+    console.warn('[API] response received, status:', response.status);
 
     if (!response.ok) {
       const erreurBody = await response.text();
@@ -148,6 +150,8 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
  */
 export const loginAPI = async (donneesConnexion) => {
   try {
+    console.warn('[API] loginAPI calling BASE_URL:', BASE_URL);
+    console.warn('[API] loginAPI with email:', donneesConnexion.email);
     const response = await fetch(`${BASE_URL}/api/login`, {
       method: 'POST',
       headers: {
@@ -155,14 +159,17 @@ export const loginAPI = async (donneesConnexion) => {
       },
       body: JSON.stringify(donneesConnexion),
     });
+    console.warn('[API] loginAPI response status:', response.status);
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => null);
       const message = errorBody?.detail || `Erreur HTTP: ${response.status}`;
+      console.error('[API] loginAPI error:', message);
       throw new Error(message);
     }
 
     const data = await response.json();
+    console.warn('[API] loginAPI success, received data:', data);
     return data;
   } catch (error) {
     console.error("Erreur dans loginAPI :", error);

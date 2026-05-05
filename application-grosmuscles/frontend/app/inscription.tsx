@@ -13,6 +13,7 @@ export default function Inscription() {
   const { setUserId, setUserName } = useAuth();
 
   const validerInscription = async () => {
+    Alert.alert('DEBUG', 'validerInscription appelée!');
     if (!nomInscription.trim()) {
       return Alert.alert("Erreur", "Veuillez entrer un nom.");
     }
@@ -21,33 +22,57 @@ export default function Inscription() {
     }
 
     try {
+      Alert.alert('DEBUG', 'Envoi requête création compte...');
       // 1. Appel à ton backend FastAPI
+      console.warn('DEBUG: validerInscription appelé');
+      console.warn('DEBUG: nom=', nomInscription, 'email=', emailInscription, 'pwd=', password);
       const reponse = await creerCompteAPI({
         nom: nomInscription,
         email: emailInscription || undefined,
         password,
       });
+      Alert.alert('DEBUG', 'Réponse création: ' + JSON.stringify(reponse).substring(0, 100));
+      console.warn('DEBUG: reponse création compte =', reponse);
 
       Alert.alert("Succès", "Compte créé ! Bienvenue.");
 
       const idUser = reponse?.utilisateur?.id_user;
       const nomUtilisateur = reponse?.utilisateur?.nom ?? nomInscription;
+      console.warn('DEBUG: idUser=', idUser, 'nom=', nomUtilisateur);
       if (!idUser) {
         throw new Error("Impossible de récupérer l'identifiant utilisateur.");
       }
 
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
+      console.warn('DEBUG: Auth context mis à jour, navigation vers /calibration...');
       router.replace(`/calibration?idUser=${encodeURIComponent(String(idUser))}`);
 
     } catch (erreur) {
+      console.error('DEBUG: erreur inscription =', erreur);
       const message = erreur instanceof Error ? erreur.message : "Impossible de créer le compte.";
       Alert.alert("Erreur", message);
     }
   };
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <>
+      <TouchableOpacity 
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 999,
+          backgroundColor: 'red',
+          padding: 10,
+          borderRadius: 5,
+        }}
+        onPress={() => Alert.alert('TEST', 'Bouton de test cliquable!')}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>TEST</Text>
+      </TouchableOpacity>
+      
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="always" contentContainerStyle={styles.scrollContent}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -125,7 +150,12 @@ export default function Inscription() {
               </View>
             </View>
             {/* CTA Button */}
-            <TouchableOpacity style={styles.ctaButton} onPress={validerInscription}>
+            <TouchableOpacity
+              style={styles.ctaButton}
+              onPress={validerInscription}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+            >
               <Text style={styles.ctaText}>CRÉER UN COMPTE</Text>
               <Text style={styles.ctaIcon}>⚡</Text>
             </TouchableOpacity>
@@ -160,6 +190,7 @@ export default function Inscription() {
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
 
@@ -279,6 +310,9 @@ const styles = StyleSheet.create({
   formContainer: {
     width: '100%',
     maxWidth: 400,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   form: {
     backgroundColor: 'rgba(26,8,29,0.4)',

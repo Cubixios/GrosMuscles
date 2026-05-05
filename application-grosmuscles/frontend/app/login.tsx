@@ -14,6 +14,7 @@ export default function Login() {
   const { setUserId, setUserName } = useAuth();
 
   const handleLogin = async () => {
+    Alert.alert('DEBUG', 'handleLogin a été appelé!');
     if (!email.trim() || !password.trim()) {
       return Alert.alert('Erreur', 'Veuillez renseigner votre e-mail et votre mot de passe.');
     }
@@ -21,16 +22,21 @@ export default function Login() {
     try {
       setLoading(true);
       setErrorMessage('');
+      Alert.alert('DEBUG', 'Envoi de la requête API...');
       const response = await loginAPI({ email: email.trim().toLowerCase(), password });
+      Alert.alert('DEBUG', 'Réponse reçue: ' + JSON.stringify(response).substring(0, 100));
       const idUser = response?.utilisateur?.id_user;
       const nomUtilisateur = response?.utilisateur?.nom ?? null;
+      console.warn('DEBUG: idUser=', idUser, 'nom=', nomUtilisateur);
       if (!idUser) {
         throw new Error('Impossible de récupérer l’identifiant utilisateur.');
       }
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
+      console.warn('DEBUG: Auth context mis à jour, navigation vers /accueil...');
       router.replace(`/accueil?idUser=${encodeURIComponent(String(idUser))}`);
     } catch (error) {
+      console.error('DEBUG: erreur attrapée =', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion.';
       setErrorMessage(message);
     } finally {
@@ -39,7 +45,7 @@ export default function Login() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="always">
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/inscription')}>
           <Text style={styles.backIcon}>←</Text>
@@ -86,7 +92,13 @@ export default function Login() {
 
           {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-          <TouchableOpacity style={[styles.loginButton, loading && styles.loginButtonDisabled]} onPress={handleLogin} disabled={loading}>
+          <TouchableOpacity
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+          >
             <Text style={styles.loginButtonText}>{loading ? 'Connexion...' : 'Se connecter'}</Text>
           </TouchableOpacity>
 
