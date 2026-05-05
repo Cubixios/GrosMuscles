@@ -47,7 +47,7 @@ export default function Inscription() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -61,7 +61,7 @@ export default function Inscription() {
         </TouchableOpacity>
       </View>
       {/* Background patterns - approximate */}
-      <View style={styles.backgroundPattern}>
+      <View style={styles.backgroundPattern} pointerEvents="none">
         <View style={styles.bgCircle1} />
         <View style={styles.bgCircle2} />
         <View style={styles.bgLine} />

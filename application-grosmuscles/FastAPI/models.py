@@ -17,6 +17,34 @@ class Utilisateur(Base):
     objectifs = relationship("Objectif", back_populates="utilisateur")
     suivis = relationship("SuiviPhysique", back_populates="utilisateur")
     seances_modeles = relationship("SeanceModele", back_populates="utilisateur")
+    profil = relationship("ProfilUtilisateur", back_populates="utilisateur", uselist=False)
+    credential = relationship("CredentialUtilisateur", back_populates="utilisateur", uselist=False)
+
+
+class CredentialUtilisateur(Base):
+    __tablename__ = "credential_utilisateur"
+
+    id_credential = Column(Integer, primary_key=True, index=True)
+    id_user = Column(Integer, ForeignKey("utilisateur.id_user"), unique=True)
+    mot_de_passe = Column(String, nullable=False)
+
+    utilisateur = relationship("Utilisateur", back_populates="credential")
+
+
+class ProfilUtilisateur(Base):
+    __tablename__ = "profil_utilisateur"
+
+    id_profil = Column(Integer, primary_key=True, index=True)
+    id_user = Column(Integer, ForeignKey("utilisateur.id_user"), unique=True)
+    age = Column(Integer, nullable=True)
+    sexe = Column(String, nullable=True)
+    sport_pratique = Column(String, nullable=True)
+    objectif = Column(String, nullable=True)
+    poids_corps = Column(Float, nullable=True)
+    taille = Column(Float, nullable=True)
+    date_calibration = Column(DateTime, default=datetime.datetime.utcnow)
+
+    utilisateur = relationship("Utilisateur", back_populates="profil")
 
 
 class Objectif(Base):

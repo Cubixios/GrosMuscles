@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Annotated
+from typing import Annotated, Optional
 from sqlalchemy.orm import Session # Correction de l'import ici
 from pydantic import BaseModel
+import datetime
 import models
 from database import SessionLocal, engine
 
@@ -22,6 +24,21 @@ app.add_middleware(
 class UserCreate(BaseModel):
     nom: str
     email: str
+    password: str
+    environnement: Optional[str] = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class CalibrationData(BaseModel):
+    poids: float
+    taille: int
+    age: int
+    sexe: str
+    sport_pratique: str
+    environnement: str
+    objectif: str
 
 class SeanceCreate(BaseModel):
     id_user: int
@@ -50,12 +67,72 @@ models.Base.metadata.create_all(bind=engine)
 # --- ÉTAPE 1 : Créer un compte ---
 @app.post("/api/utilisateurs")
 def creer_compte(user: UserCreate, db: db_dependency):
-    # On utilise "Utilisateur" comme défini dans ton models.py précédent
-    new_user = models.Utilisateur(nom=user.nom, email=user.email)
+    existing_user = db.query(models.Utilisateur).filter(models.Utilisateur.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Cette adresse e-mail est déjà utilisée.")
+
+    new_user = models.Utilisateur(
+        nom=user.nom,
+        email=user.email,
+        environnement=user.environnement or "",
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return {"statut": "succès", "utilisateur": new_user}
+
+    credentials = models.CredentialUtilisateur(
+        id_user=new_user.id_user,
+        mot_de_passe=user.password,
+    )
+    db.add(credentials)
+    db.commit()
+
+    return {"statut": "succès", "utilisateur": jsonable_encoder(new_user)}
+
+
+@app.post("/api/login")
+def login(credentials: UserLogin, db: db_dependency):
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.email == credentials.email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Identifiants invalides.")
+
+    auth = db.query(models.CredentialUtilisateur).filter(models.CredentialUtilisateur.id_user == user.id_user).first()
+    if not auth or auth.mot_de_passe != credentials.password:
+        raise HTTPException(status_code=401, detail="Identifiants invalides.")
+
+    return {"statut": "succès", "utilisateur": jsonable_encoder(user)}
+
+
+@app.put("/api/utilisateurs/{user_id}/calibration")
+def calibrer_profil(user_id: int, calibration: CalibrationData, db: db_dependency):
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.id_user == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé.")
+
+    user.environnement = calibration.environnement
+
+    profil = db.query(models.ProfilUtilisateur).filter(models.ProfilUtilisateur.id_user == user_id).first()
+    if not profil:
+        profil = models.ProfilUtilisateur(
+            id_user=user_id,
+            age=calibration.age,
+            sexe=calibration.sexe,
+            sport_pratique=calibration.sport_pratique,
+            objectif=calibration.objectif,
+            poids_corps=calibration.poids,
+            taille=calibration.taille,
+        )
+        db.add(profil)
+    else:
+        profil.age = calibration.age
+        profil.sexe = calibration.sexe
+        profil.sport_pratique = calibration.sport_pratique
+        profil.objectif = calibration.objectif
+        profil.poids_corps = calibration.poids
+        profil.taille = calibration.taille
+    db.commit()
+
+    return {"statut": "succès", "profil": jsonable_encoder(profil)}
 
 
 # --- ÉTAPE 2 & 3 : Saisir séance & Recevoir Conseil IA ---
@@ -89,3 +166,8 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
         "message": f"Séance '{seance.nom_seance}' enregistrée avec succès dans la BDD.",
         "conseil_ia": conseil_ia
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

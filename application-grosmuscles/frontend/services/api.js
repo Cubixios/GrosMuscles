@@ -1,5 +1,11 @@
-// 1. Définition de l'URL de base (Ton IP locale)
-const BASE_URL = "http://10.31.66.9:8001";
+import { Platform } from 'react-native';
+
+// Définition de l'URL de base pour le backend FastAPI local
+// - 127.0.0.1:8000 est la valeur standard pour uvicorn local
+// - 10.0.2.2 est nécessaire pour Android Emulator sur Windows
+const BACKEND_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
+const BACKEND_PORT = 8000;
+const BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
 /**
  * On décrit la forme de la réponse attendue du backend pour que VS Code comprenne
