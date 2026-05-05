@@ -3,7 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated, Optional
 from sqlalchemy.orm import Session # Correction de l'import ici
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from passlib.context import CryptContext
 import datetime
 import models
 from database import SessionLocal, engine
@@ -20,15 +21,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Sécurité : Hachage des mots de passe ---
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # --- Schémas Pydantic ---
 class UserCreate(BaseModel):
     nom: str
-    email: str
+    email: EmailStr # Validation automatique du format email
     password: str
     environnement: Optional[str] = None
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr # Validation automatique du format email
     password: str
 
 class CalibrationData(BaseModel):
@@ -82,7 +86,7 @@ def creer_compte(user: UserCreate, db: db_dependency):
 
     credentials = models.CredentialUtilisateur(
         id_user=new_user.id_user,
-        mot_de_passe=user.password,
+        mot_de_passe=pwd_context.hash(user.password), # On hashe le mot de passe
     )
     db.add(credentials)
     db.commit()
@@ -97,7 +101,8 @@ def login(credentials: UserLogin, db: db_dependency):
         raise HTTPException(status_code=401, detail="Identifiants invalides.")
 
     auth = db.query(models.CredentialUtilisateur).filter(models.CredentialUtilisateur.id_user == user.id_user).first()
-    if not auth or auth.mot_de_passe != credentials.password:
+    # On vérifie le mot de passe hashé
+    if not auth or not pwd_context.verify(credentials.password, auth.mot_de_passe):
         raise HTTPException(status_code=401, detail="Identifiants invalides.")
 
     return {"statut": "succès", "utilisateur": jsonable_encoder(user)}
@@ -145,6 +150,7 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
     
     # 2. ENREGISTREMENT DE LA SÉANCE EN BDD
     nouvelle_seance = models.SeanceRealisee(
+        id_user=seance.id_user, # <-- LIGNE CRITIQUE MANQUANTE
         id_modele=1, # Valeur par défaut pour le test
         duree_totale=seance.duree_totale,
         note_fatigue=seance.note_fatigue
@@ -166,6 +172,16 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
         "message": f"Séance '{seance.nom_seance}' enregistrée avec succès dans la BDD.",
         "conseil_ia": conseil_ia
     }
+
+# --- ÉTAPE 4 : Récupérer l'historique ---
+@app.get("/api/seances/{user_id}")
+def get_seances_par_utilisateur(user_id: int, db: db_dependency):
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.id_user == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+    seances = db.query(models.SeanceRealisee).filter(models.SeanceRealisee.id_user == user_id).order_by(models.SeanceRealisee.date_heure.desc()).all()
+    return jsonable_encoder(seances)
 
 
 if __name__ == "__main__":

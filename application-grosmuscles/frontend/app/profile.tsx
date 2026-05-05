@@ -21,7 +21,7 @@ const TEXT_SECONDARY = '#a1a1a1';
 
 export default function Profile() {
   const router = useRouter();
-  const { logout, userName } = useAuth();
+  const { logout, userName } = useAuth(); // `logout` vient maintenant du contexte
 
   const handleLogout = () => {
     Alert.alert(
@@ -33,8 +33,8 @@ export default function Profile() {
           text: 'Déconnecter',
           style: 'destructive',
           onPress: () => {
+            // On appelle simplement logout. Le layout s'occupera de la redirection.
             logout();
-            router.replace('/inscription');
           },
         },
       ]

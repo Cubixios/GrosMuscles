@@ -1,50 +1,31 @@
 ﻿# ============================================================
 # 🚀 FASTAPI BACKEND ET FRONTEND — GUIDE DE DÉMARRAGE
 # ============================================================
+# 1. BACKEND (FastAPI)
+# --------------------
+# Ouvre un terminal dans le dossier `FastAPI`.
 #
-# 1) Démarrage du backend FastAPI
-#    Ouvrir un terminal PowerShell dans :
-#      C:\Users\Mathys Neret\Documents\GitHub\GrosMuscles\application-grosmuscles\FastAPI
+# a. Installer les dépendances (la première fois) :
+#    pip install -r requirement.txt
 #
-#    Ensuite exécuter :
-#      uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# b. Lancer le serveur :
+#    uvicorn main:app --reload --host 0.0.0.0 --port 8000
 #
-#    Si vous lancez depuis la racine du projet, utilisez :
-#      python -m uvicorn application-grosmuscles.FastAPI.main:app --reload --host 0.0.0.0 --port 8000
+# 2. FRONTEND (Expo)
+# ------------------
+# Ouvre un SECOND terminal dans le dossier `frontend`.
 #
+# a. Installer les dépendances (la première fois) :
+#    npm install
 #
-# 2) Démarrage du frontend Expo
-#    Ouvrir un second terminal PowerShell dans :
-#      C:\Users\Mathys Neret\Documents\GitHub\GrosMuscles\application-grosmuscles\frontend
+# b. Lancer l'application :
+#    npx expo start
 #
-#    Ensuite exécuter :
-#      npx expo start
-#
-#    Ou pour lancer directement :
-#      npx expo start --android
-#      npx expo start --ios
-#      npx expo start --web
-#
-#
-# 3) Points importants
-#    - Le backend doit tourner avant d’utiliser l’inscription ou la connexion.
-#    - Si tu utilises un émulateur Android sur Windows, l’API doit cibler :
-#        http://10.0.2.2:8000
-#    - Pour un appareil physique, utilise de préférence le mode tunnel Expo :
-#        npx expo start --tunnel
-#      Cela évite les problèmes de réseau liés au hotspot / QR code.
-#    - Si tu veux forcer une IP fixe, remplace l’hôte dans `frontend/services/api.js`
-#      par l’adresse IP réelle de ton PC sur le réseau du téléphone.
-#    - Si tu testes sur le web ou dans un simulateur iOS, l’API doit cibler :
-#        http://127.0.0.1:8000
-#    - La base SQLite est stockée ici :
-#        application-grosmuscles/FastAPI/grosmuscles.db
-#    - Les tables sont créées automatiquement au premier démarrage de FastAPI.
-#
-# 4) Commandes utiles supplémentaires
-#    - Installer les dépendances frontend :
-#        npm install
-#    - Installer les dépendances Python :
-#        python -m pip install -r requirement.txt
-#
+# 3. NOTES IMPORTANTES
+# --------------------
+# - Le backend doit être lancé pour que l'application fonctionne.
+# - La détection de l'IP du backend est automatique dans `frontend/services/api.js`.
+# - Pour un appareil physique, le mode tunnel est recommandé si le QR code ne marche pas :
+#   npx expo start --tunnel
+# - La base de données SQLite se trouve dans `FastAPI/grosmuscles.db`.
 # ============================================================

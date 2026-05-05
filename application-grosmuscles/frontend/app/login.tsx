@@ -34,7 +34,8 @@ export default function Login() {
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
       console.warn('DEBUG: Auth context mis à jour, navigation vers /accueil...');
-      router.replace(`/accueil?idUser=${encodeURIComponent(String(idUser))}`);
+      // Le layout racine s'occupera de la redirection vers la page principale.
+      router.replace('/');
     } catch (error) {
       console.error('DEBUG: erreur attrapée =', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion.';

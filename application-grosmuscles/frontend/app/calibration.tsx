@@ -3,12 +3,11 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { calibrerProfilAPI } from '../services/api';
+import { useAuth } from '../lib/AuthContext';
 
 export default function Calibration() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const rawUserId = params.idUser ?? params.id_user ?? params.user_id;
-  const userId = Array.isArray(rawUserId) ? String(rawUserId[0]) : rawUserId ? String(rawUserId) : '';
+  const { userId } = useAuth();
 
   useEffect(() => {
     if (!userId) {
@@ -49,7 +48,8 @@ export default function Calibration() {
       });
 
       Alert.alert("Succès", "Calibration terminée !");
-      router.replace(`/accueil?idUser=${encodeURIComponent(userId)}`); // Aller à la page d'accueil avec l'idUser
+      // Le layout racine s'occupera de la redirection.
+      router.replace('/');
     } catch (error) {
       console.error('Erreur lors de la calibration:', error);
       Alert.alert("Erreur", "Impossible de sauvegarder la calibration.");

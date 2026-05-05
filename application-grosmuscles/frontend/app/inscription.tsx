@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { creerCompteAPI } from '../services/api';
 import { useAuth } from '../lib/AuthContext';
@@ -8,6 +8,7 @@ export default function Inscription() {
   const [nomInscription, setNomInscription] = useState('');
   const [emailInscription, setEmailInscription] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const { setUserId, setUserName } = useAuth();
@@ -22,13 +23,14 @@ export default function Inscription() {
     }
 
     try {
+      setLoading(true);
       Alert.alert('DEBUG', 'Envoi requête création compte...');
       // 1. Appel à ton backend FastAPI
       console.warn('DEBUG: validerInscription appelé');
       console.warn('DEBUG: nom=', nomInscription, 'email=', emailInscription, 'pwd=', password);
       const reponse = await creerCompteAPI({
         nom: nomInscription,
-        email: emailInscription || undefined,
+        email: emailInscription.trim().toLowerCase(),
         password,
       });
       Alert.alert('DEBUG', 'Réponse création: ' + JSON.stringify(reponse).substring(0, 100));
@@ -46,45 +48,29 @@ export default function Inscription() {
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
       console.warn('DEBUG: Auth context mis à jour, navigation vers /calibration...');
-      router.replace(`/calibration?idUser=${encodeURIComponent(String(idUser))}`);
+      // Le layout racine s'occupera de la redirection.
+      router.replace('/calibration');
 
     } catch (erreur) {
       console.error('DEBUG: erreur inscription =', erreur);
       const message = erreur instanceof Error ? erreur.message : "Impossible de créer le compte.";
       Alert.alert("Erreur", message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <TouchableOpacity 
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          zIndex: 999,
-          backgroundColor: 'red',
-          padding: 10,
-          borderRadius: 5,
-        }}
-        onPress={() => Alert.alert('TEST', 'Bouton de test cliquable!')}
-      >
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>TEST</Text>
-      </TouchableOpacity>
-      
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="always" contentContainerStyle={styles.scrollContent}>
-      {/* Header */}
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoIcon}>👤</Text>
           </View>
           <Text style={styles.logoText}>Gros Muscle</Text>
-        </View>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={styles.headerIcon}>🔔</Text>
-        </TouchableOpacity>
+        </View> 
       </View>
+      <ScrollView style={styles.scrollContainer} keyboardShouldPersistTaps="always" contentContainerStyle={styles.scrollContent}>
       {/* Background patterns - approximate */}
       <View style={styles.backgroundPattern} pointerEvents="none">
         <View style={styles.bgCircle1} />
@@ -151,13 +137,17 @@ export default function Inscription() {
             </View>
             {/* CTA Button */}
             <TouchableOpacity
-              style={styles.ctaButton}
+              style={[styles.ctaButton, loading && styles.ctaButtonDisabled]}
               onPress={validerInscription}
               activeOpacity={0.85}
               accessibilityRole="button"
+              disabled={loading}
             >
-              <Text style={styles.ctaText}>CRÉER UN COMPTE</Text>
-              <Text style={styles.ctaIcon}>⚡</Text>
+              {loading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <><Text style={styles.ctaText}>CRÉER UN COMPTE</Text><Text style={styles.ctaIcon}>⚡</Text></>
+              )}
             </TouchableOpacity>
             {/* Divider */}
             <View style={styles.divider}>
@@ -189,8 +179,8 @@ export default function Inscription() {
           </Text>
         </View>
       </View>
-    </ScrollView>
-    </>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -198,19 +188,18 @@ export default function Inscription() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a030b',
+    backgroundColor: '#0a030b', 
   },
-  header: {
-    position: 'absolute',
-    top: 0,
-    width: '100%',
-    zIndex: 50,
+  header: { 
     backgroundColor: 'rgba(0,0,0,0.6)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  scrollContainer: {
+    flex: 1,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -280,8 +269,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '12deg' }],
   },
   main: {
-    paddingTop: 100,
-    paddingBottom: 60,
+    paddingVertical: 40,
     paddingHorizontal: 20,
     alignItems: 'center',
   },
@@ -378,6 +366,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginTop: 18,
+  },
+  ctaButtonDisabled: {
+    backgroundColor: '#7c627e',
   },
   ctaText: {
     color: '#ffffff',
