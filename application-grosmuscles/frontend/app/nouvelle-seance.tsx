@@ -158,6 +158,7 @@ export default function NouvelleSeance() {
     }));
 
     setCurrentSession({
+      id: new Date().getTime().toString(),
       name: sessionName.trim() || 'Nouvelle Séance',
       exercises: sessionExercises,
       createdAt: new Date().toISOString(),
@@ -367,7 +368,7 @@ export default function NouvelleSeance() {
         </View>
 
         <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/accueil')}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
             <MaterialCommunityIcons name="home-outline" size={24} color={TEXT_SECONDARY} />
             <Text style={styles.navText}>Accueil</Text>
           </TouchableOpacity>

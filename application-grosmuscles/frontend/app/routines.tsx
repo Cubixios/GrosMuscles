@@ -238,7 +238,7 @@ export default function Routines() {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/accueil')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
           <MaterialCommunityIcons name="home-outline" size={24} color={TEXT_SECONDARY} />
           <Text style={styles.navLabel}>Accueil</Text>
         </TouchableOpacity>
@@ -247,7 +247,6 @@ export default function Routines() {
             name="dumbbell"
             size={24}
             color={PURPLE}
-            solid={true}
           />
           <Text style={[styles.navLabel, { color: PURPLE }]}>Routines</Text>
         </TouchableOpacity>

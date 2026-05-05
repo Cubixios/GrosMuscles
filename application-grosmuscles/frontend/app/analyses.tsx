@@ -38,7 +38,7 @@ export default function Analyses() {
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/accueil')}
+          onPress={() => router.push('/')}
         >
           <MaterialCommunityIcons
             name="home-outline"

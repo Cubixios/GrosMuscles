@@ -79,7 +79,7 @@ export default function SeanceEnCours() {
   const handleFinish = () => {
     setIsRunning(false);
     clearSession();
-    router.push('/accueil');
+    router.push('/');
   };
 
   const generateAIAdvice = () => {
@@ -103,7 +103,7 @@ export default function SeanceEnCours() {
             <Text style={styles.emptyDescription}>
               Crée une séance dans l'onglet Routines ou Nouvelle Séance pour commencer.
             </Text>
-            <TouchableOpacity style={styles.emptyButton} onPress={() => router.push('/routines')}>
+            <TouchableOpacity style={styles.emptyButton} onPress={() => router.push('/routines' as any)}>
               <Text style={styles.emptyButtonText}>Voir mes routines</Text>
             </TouchableOpacity>
           </View>
@@ -260,7 +260,7 @@ export default function SeanceEnCours() {
         </View>
 
         <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/accueil')}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
             <MaterialCommunityIcons name="home-outline" size={24} color={TEXT_SECONDARY} />
             <Text style={styles.navText}>Accueil</Text>
           </TouchableOpacity>
