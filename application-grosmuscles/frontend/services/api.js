@@ -1,29 +1,17 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-// Définition de l'URL de base pour le backend FastAPI local
-// - 127.0.0.1:8000 est utilisé pour le web et les simulateurs
-// - 10.0.2.2:8000 est utilisé pour l'émulateur Android sur Windows
-// - 192.168.56.1:8000 est ton PC sur le réseau local pour un appareil physique
-const LOCALHOST = '127.0.0.1';
-const ANDROID_EMULATOR = '10.0.2.2';
-const PHYSICAL_DEVICE_HOST = '192.168.56.1';
-
-const manifest = Constants.manifest || Constants.expoConfig || {};
-const debuggerHost = typeof manifest.debuggerHost === 'string' ? manifest.debuggerHost.split(':')[0] : null;
-const hostFromManifest = debuggerHost || null;
-
-const BACKEND_HOST = Platform.OS === 'web'
-  ? LOCALHOST
-  : hostFromManifest
-    ? hostFromManifest
-    : Platform.OS === 'android'
-      ? Constants.isDevice ? PHYSICAL_DEVICE_HOST : ANDROID_EMULATOR
-      : Constants.isDevice
-        ? PHYSICAL_DEVICE_HOST
-        : LOCALHOST;
-
-const BACKEND_PORT = 8000;
+// =================================================================================
+// SOLUTION ROBUSTE POUR LE DÉVELOPPEMENT LOCAL (WEB & MOBILE)
+//
+// 1. Pour le mobile (Android/iOS), on utilise l'IP locale du PC.
+const MOBILE_HOST = '192.168.1.36'; // <--- VÉRIFIEZ QUE C'EST TOUJOURS VOTRE IP LOCALE
+// 2. Pour le web, on utilise 'localhost' car le navigateur et le serveur sont sur la même machine.
+const WEB_HOST = 'localhost';
+const BACKEND_HOST = Platform.OS === 'web' ? WEB_HOST : MOBILE_HOST;
+// =================================================================================
+ 
+const BACKEND_PORT = 8001; // Port mis à jour pour éviter le conflit avec NT-ware MOM HTTP Server
 const BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
 /**
@@ -132,7 +120,10 @@ export const creerCompteAPI = async (donneesUtilisateur) => {
     const data = await response.json();
     return data; // Doit contenir l'id_user renvoyé par Python
   } catch (error) {
-    console.error("Erreur dans creerCompteAPI :", error);
+    console.error("Erreur dans creerCompteAPI :", error.message);
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('Serveur injoignable. Vérifiez la connexion et que le backend est bien lancé.');
+    }
     throw error;
   }
 };
@@ -172,7 +163,10 @@ export const loginAPI = async (donneesConnexion) => {
     console.warn('[API] loginAPI success, received data:', data);
     return data;
   } catch (error) {
-    console.error("Erreur dans loginAPI :", error);
+    console.error("Erreur dans loginAPI :", error.message);
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('Serveur injoignable. Vérifiez la connexion et que le backend est bien lancé.');
+    }
     throw error;
   }
 };

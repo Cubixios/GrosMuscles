@@ -63,7 +63,7 @@ export default function Inscription() {
       </View>
       <ScrollView style={styles.scrollContainer} keyboardShouldPersistTaps="always" contentContainerStyle={styles.scrollContent}>
       {/* Background patterns - approximate */}
-      <View style={styles.backgroundPattern} pointerEvents="none">
+      <View style={styles.backgroundPattern}>
         <View style={styles.bgCircle1} />
         <View style={styles.bgCircle2} />
         <View style={styles.bgLine} />
@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     opacity: 0.2,
+    pointerEvents: 'none',
   },
   bgCircle1: {
     position: 'absolute',

@@ -92,6 +92,9 @@ export default function Accueil() {
     return mins > 0 ? `${heures}h${mins}` : `${heures}h`;
   };
 
+  // Calculer le temps total d'entraînement à partir des séances chargées
+  const totalMinutes = seances.reduce((sum, seance) => sum + seance.duree_totale, 0);
+
   useEffect(() => {
     if (!rootNavigationState?.key) return;
 
@@ -189,8 +192,8 @@ export default function Accueil() {
             <Text style={styles.statLabel}>Routines</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>42h</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statNumber}>{formatDuration(totalMinutes)}</Text>
+            <Text style={styles.statLabel}>Temps Total</Text>
           </View>
         </View>
 
