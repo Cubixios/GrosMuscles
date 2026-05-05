@@ -55,8 +55,8 @@ export default function SeanceEnCours() {
   const calculateTotalEstimatedTime = () => {
     let totalSeconds = 0;
     exercises.forEach((exercise) => {
-      exercise.series.forEach((serie) => {
-        totalSeconds += serie.reps * 3 + serie.restTime;
+      exercise.series?.forEach((serie) => {
+        totalSeconds += (serie.reps || 0) * 3 + (serie.restTime || 0);
       });
     });
     return totalSeconds;
@@ -169,7 +169,7 @@ export default function SeanceEnCours() {
           {/* Series List */}
           <View style={styles.seriesSection}>
             <Text style={styles.seriesSectionTitle}>Séries de cet exercice</Text>
-            {currentExercise.series.map((serie, index) => (
+            {currentExercise?.series?.map((serie, index) => (
               <View key={serie.id} style={styles.serieCard}>
                 <View style={styles.serieHeader}>
                   <View style={styles.serieBadge}>
@@ -177,7 +177,7 @@ export default function SeanceEnCours() {
                   </View>
                   <View style={styles.serieInfo}>
                     <Text style={styles.serieDetail}>
-                      <Text style={styles.serieLabel}>Reps:</Text> {serie.reps}
+                      <Text style={styles.serieLabel}>Reps:</Text> {serie.reps || 0}
                     </Text>
                     <Text style={styles.serieDetail}>
                       <Text style={styles.serieLabel}>Poids:</Text> {serie.weight}
