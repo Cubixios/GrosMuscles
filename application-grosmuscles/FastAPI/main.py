@@ -96,15 +96,26 @@ def creer_compte(user: UserCreate, db: db_dependency):
 
 @app.post("/api/login")
 def login(credentials: UserLogin, db: db_dependency):
+    print(f"Tentative de connexion pour l'email : {credentials.email}")
     user = db.query(models.Utilisateur).filter(models.Utilisateur.email == credentials.email).first()
     if not user:
+        print("Échec : Utilisateur non trouvé dans la base de données.")
         raise HTTPException(status_code=401, detail="Identifiants invalides.")
 
+    print(f"Succès : Utilisateur trouvé, ID: {user.id_user}")
     auth = db.query(models.CredentialUtilisateur).filter(models.CredentialUtilisateur.id_user == user.id_user).first()
-    # On vérifie le mot de passe hashé
-    if not auth or not pwd_context.verify(credentials.password, auth.mot_de_passe):
+    
+    if not auth:
+        print(f"Échec : Aucune information d'authentification trouvée pour l'utilisateur ID: {user.id_user}")
         raise HTTPException(status_code=401, detail="Identifiants invalides.")
 
+    # On vérifie le mot de passe hashé
+    password_is_valid = pwd_context.verify(credentials.password, auth.mot_de_passe)
+    if not password_is_valid:
+        print(f"Échec : Le mot de passe est incorrect pour l'utilisateur ID: {user.id_user}")
+        raise HTTPException(status_code=401, detail="Identifiants invalides.")
+
+    print(f"Succès : Le mot de passe est valide pour l'utilisateur ID: {user.id_user}. Connexion réussie.")
     return {"statut": "succès", "utilisateur": jsonable_encoder(user)}
 
 
