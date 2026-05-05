@@ -116,6 +116,7 @@ class SeanceRealisee(Base):
     id_modele = Column(Integer, ForeignKey("seance_modele.id_modele")) # [cite: 58]
     id_user = Column(Integer, ForeignKey("utilisateur.id_user"), nullable=False)
     date_heure = Column(DateTime, default=datetime.datetime.utcnow) # [cite: 59]
+    nom_seance = Column(String, nullable=True) # Ajout du nom de la séance
     duree_totale = Column(Integer) # en minutes [cite: 60]
     note_fatigue = Column(Integer) # [cite: 61]
 

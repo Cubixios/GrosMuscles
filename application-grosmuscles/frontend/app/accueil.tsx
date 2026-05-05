@@ -23,12 +23,21 @@ const TEXT_PRIMARY = '#f9f9fd';
 const TEXT_SECONDARY = '#a1a1a1';
 const OUTLINE = '#333333';
 
+// Définissons un type pour nos séances pour plus de clarté et de sécurité
+interface Seance {
+  id_realise: number;
+  nom_seance: string;
+  date_heure: string;
+  duree_totale: number;
+  note_fatigue: number;
+}
+
 export default function Accueil() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const { userId, setUserId } = useAuth();
-  const [seances, setSeances] = useState<any[]>([]);
+  const [seances, setSeances] = useState<Seance[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,7 +112,7 @@ export default function Accueil() {
   }
 
   // Composant pour afficher une seule séance dans la FlatList
-  const renderSeanceCard = ({ item }: { item: any }) => (
+  const renderSeanceCard = ({ item }: { item: Seance }) => (
     <TouchableOpacity style={styles.sessionCard}>
       <View style={styles.sessionLeft}>
         <View style={styles.sessionIconContainer}>

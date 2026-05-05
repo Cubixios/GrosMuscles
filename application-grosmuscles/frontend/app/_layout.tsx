@@ -16,7 +16,7 @@ function RootLayoutNav() {
     // On attend que le contexte d'authentification soit chargé.
     if (!isLoaded) return;
 
-    const inAuthGroup = segments.length > 0 && ['inscription', 'login', 'calibration'].includes(segments[0]);
+    const inAuthGroup = segments.length > 0 && ['inscription', 'login'].includes(segments[0]);
 
     if (userId && inAuthGroup) {
       // L'utilisateur est connecté mais sur une page d'authentification.

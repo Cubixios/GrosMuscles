@@ -152,6 +152,7 @@ def enregistrer_seance_et_analyser(seance: SeanceCreate, db: db_dependency):
     nouvelle_seance = models.SeanceRealisee(
         id_user=seance.id_user,
         id_modele=1, # Valeur par défaut pour le test
+        nom_seance=seance.nom_seance, # On enregistre le nom de la séance
         duree_totale=seance.duree_totale,
         note_fatigue=seance.note_fatigue
     )

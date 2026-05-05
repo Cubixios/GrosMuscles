@@ -14,7 +14,6 @@ export default function Login() {
   const { setUserId, setUserName } = useAuth();
 
   const handleLogin = async () => {
-    Alert.alert('DEBUG', 'handleLogin a été appelé!');
     if (!email.trim() || !password.trim()) {
       return Alert.alert('Erreur', 'Veuillez renseigner votre e-mail et votre mot de passe.');
     }
@@ -22,22 +21,17 @@ export default function Login() {
     try {
       setLoading(true);
       setErrorMessage('');
-      Alert.alert('DEBUG', 'Envoi de la requête API...');
       const response = await loginAPI({ email: email.trim().toLowerCase(), password });
-      Alert.alert('DEBUG', 'Réponse reçue: ' + JSON.stringify(response).substring(0, 100));
       const idUser = response?.utilisateur?.id_user;
       const nomUtilisateur = response?.utilisateur?.nom ?? null;
-      console.warn('DEBUG: idUser=', idUser, 'nom=', nomUtilisateur);
       if (!idUser) {
         throw new Error('Impossible de récupérer l’identifiant utilisateur.');
       }
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
-      console.warn('DEBUG: Auth context mis à jour, navigation vers /accueil...');
       // Le layout racine s'occupera de la redirection vers la page principale.
       router.replace('/');
     } catch (error) {
-      console.error('DEBUG: erreur attrapée =', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion.';
       setErrorMessage(message);
     } finally {

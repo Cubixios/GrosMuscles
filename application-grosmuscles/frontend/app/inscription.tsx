@@ -14,7 +14,6 @@ export default function Inscription() {
   const { setUserId, setUserName } = useAuth();
 
   const validerInscription = async () => {
-    Alert.alert('DEBUG', 'validerInscription appelée!');
     if (!nomInscription.trim()) {
       return Alert.alert("Erreur", "Veuillez entrer un nom.");
     }
@@ -24,35 +23,27 @@ export default function Inscription() {
 
     try {
       setLoading(true);
-      Alert.alert('DEBUG', 'Envoi requête création compte...');
       // 1. Appel à ton backend FastAPI
-      console.warn('DEBUG: validerInscription appelé');
-      console.warn('DEBUG: nom=', nomInscription, 'email=', emailInscription, 'pwd=', password);
       const reponse = await creerCompteAPI({
         nom: nomInscription,
         email: emailInscription.trim().toLowerCase(),
         password,
       });
-      Alert.alert('DEBUG', 'Réponse création: ' + JSON.stringify(reponse).substring(0, 100));
-      console.warn('DEBUG: reponse création compte =', reponse);
 
       Alert.alert("Succès", "Compte créé ! Bienvenue.");
 
       const idUser = reponse?.utilisateur?.id_user;
       const nomUtilisateur = reponse?.utilisateur?.nom ?? nomInscription;
-      console.warn('DEBUG: idUser=', idUser, 'nom=', nomUtilisateur);
       if (!idUser) {
         throw new Error("Impossible de récupérer l'identifiant utilisateur.");
       }
 
       setUserId(String(idUser));
       setUserName(nomUtilisateur);
-      console.warn('DEBUG: Auth context mis à jour, navigation vers /calibration...');
       // Le layout racine s'occupera de la redirection.
       router.replace('/calibration');
 
     } catch (erreur) {
-      console.error('DEBUG: erreur inscription =', erreur);
       const message = erreur instanceof Error ? erreur.message : "Impossible de créer le compte.";
       Alert.alert("Erreur", message);
     } finally {
