@@ -38,7 +38,7 @@ export default function Calibration() {
     }
 
     try {
-      await calibrerProfilAPI(parseInt(userId), {
+      await calibrerProfilAPI(userId, {
         poids: parseFloat(poids),
         taille: parseInt(taille),
         age: parseInt(age),

@@ -16,7 +16,7 @@ export default function SeanceEnCours() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const exercises = currentSession?.exercises ?? [];
 
   // Timer logic
@@ -55,8 +55,8 @@ export default function SeanceEnCours() {
   const calculateTotalEstimatedTime = () => {
     let totalSeconds = 0;
     exercises.forEach((exercise) => {
-      exercise.series?.forEach((serie) => {
-        totalSeconds += (serie.reps || 0) * 3 + (serie.restTime || 0);
+      exercise.series.forEach((serie) => {
+        totalSeconds += serie.reps * 3 + serie.restTime;
       });
     });
     return totalSeconds;
@@ -169,7 +169,7 @@ export default function SeanceEnCours() {
           {/* Series List */}
           <View style={styles.seriesSection}>
             <Text style={styles.seriesSectionTitle}>Séries de cet exercice</Text>
-            {currentExercise?.series?.map((serie, index) => (
+            {currentExercise.series.map((serie, index) => (
               <View key={serie.id} style={styles.serieCard}>
                 <View style={styles.serieHeader}>
                   <View style={styles.serieBadge}>
@@ -177,7 +177,7 @@ export default function SeanceEnCours() {
                   </View>
                   <View style={styles.serieInfo}>
                     <Text style={styles.serieDetail}>
-                      <Text style={styles.serieLabel}>Reps:</Text> {serie.reps || 0}
+                      <Text style={styles.serieLabel}>Reps:</Text> {serie.reps}
                     </Text>
                     <Text style={styles.serieDetail}>
                       <Text style={styles.serieLabel}>Poids:</Text> {serie.weight}

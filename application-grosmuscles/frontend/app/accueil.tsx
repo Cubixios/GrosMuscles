@@ -40,7 +40,6 @@ export default function Accueil() {
   }, [userId]);
 
   const chargerSeances = async () => {
-    if (!userId) return;
     try {
       setLoading(true);
       setError(null);

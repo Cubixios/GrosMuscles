@@ -55,7 +55,7 @@ export default function Routines() {
   };
 
   const handleStartRoutine = (routine: any) => {
-    const standardExercisesData = [
+    const standardExercises = [
       {
         id: 'bench-press',
         name: 'Développé Couché',
@@ -64,7 +64,6 @@ export default function Routines() {
         reps: 8,
         weight: '80 kg',
         image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80',
-        icon: 'dumbbell',
       },
       {
         id: 'squat',
@@ -74,7 +73,6 @@ export default function Routines() {
         reps: 8,
         weight: '100 kg',
         image: 'https://images.unsplash.com/photo-1558611848-73f7eb4001d0?auto=format&fit=crop&w=400&q=80',
-        icon: 'dumbbell',
       },
       {
         id: 'pullups',
@@ -84,23 +82,8 @@ export default function Routines() {
         reps: 8,
         weight: 'Corps',
         image: 'https://images.unsplash.com/photo-1517964603305-6ef132a6e2f9?auto=format&fit=crop&w=400&q=80',
-        icon: 'body',
       },
     ];
-
-    const standardExercises = standardExercisesData.map(ex => ({
-      id: ex.id,
-      name: ex.name,
-      group: ex.group,
-      image: ex.image,
-      icon: ex.icon,
-      series: Array.from({ length: ex.sets }, (_, i) => ({
-        id: `${ex.id}-set-${i + 1}`,
-        reps: ex.reps,
-        weight: ex.weight,
-        restTime: 90, // default rest time
-      })),
-    }));
 
     setCurrentSession({
       name: routine.name,
