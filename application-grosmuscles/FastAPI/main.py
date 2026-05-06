@@ -81,15 +81,15 @@ def creer_compte(user: UserCreate, db: db_dependency):
         environnement=user.environnement or "",
     )
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    db.flush() # Envoie la requête à la BDD pour obtenir un ID, sans "commiter" la transaction.
 
     credentials = models.CredentialUtilisateur(
         id_user=new_user.id_user,
         mot_de_passe=pwd_context.hash(user.password), # On hashe le mot de passe
     )
     db.add(credentials)
-    db.commit()
+    db.commit() # Commit atomique : l'utilisateur et ses credentials sont sauvegardés en même temps.
+    db.refresh(new_user)
 
     return {"statut": "succès", "utilisateur": jsonable_encoder(new_user)}
 
@@ -198,4 +198,4 @@ def get_seances_par_utilisateur(user_id: int, db: db_dependency):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

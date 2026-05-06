@@ -11,7 +11,7 @@ const WEB_HOST = 'localhost';
 const BACKEND_HOST = Platform.OS === 'web' ? WEB_HOST : MOBILE_HOST;
 // =================================================================================
  
-const BACKEND_PORT = 8001; // Port mis à jour pour éviter le conflit avec NT-ware MOM HTTP Server
+const BACKEND_PORT = 8001; // Port mis à jour pour correspondre au backend
 const BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
 /**

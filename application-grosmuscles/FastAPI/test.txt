@@ -1,4 +1,4 @@
-﻿# ============================================================
+﻿﻿# ============================================================
 # 🚀 FASTAPI BACKEND ET FRONTEND — GUIDE DE DÉMARRAGE
 # ============================================================
 # 1. BACKEND (FastAPI)
@@ -9,7 +9,7 @@
 #    pip install -r requirement.txt
 #
 # b. Lancer le serveur :
-#    uvicorn main:app --reload --host 0.0.0.0 --port 8000
+#    uvicorn main:app --reload --host 0.0.0.0 --port 8001
 #
 # 2. FRONTEND (Expo)
 # ------------------
