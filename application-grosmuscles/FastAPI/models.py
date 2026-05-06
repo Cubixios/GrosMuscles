@@ -119,6 +119,8 @@ class SeanceRealisee(Base):
     nom_seance = Column(String, nullable=True) # Ajout du nom de la séance
     duree_totale = Column(Integer) # en minutes [cite: 60]
     note_fatigue = Column(Integer) # [cite: 61]
+    total_weight_lifted = Column(Float, nullable=True)
+    pr_count = Column(Integer, nullable=True)
 
     seance_modele = relationship("SeanceModele", back_populates="seances_realisees")
     performances = relationship("PerformanceSerie", back_populates="seance_realisee")

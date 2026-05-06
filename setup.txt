@@ -1,0 +1,81 @@
+﻿﻿# ===================================================================
+# 🚀 GROSMUSCLES — GUIDE DE DÉMARRAGE COMPLET
+# ===================================================================
+#
+# Ce guide vous explique comment lancer l'environnement de 
+# développement complet (Backend FastAPI + Frontend Expo).
+#
+# -------------------------------------------------------------------
+# ÉTAPE 0 : PRÉREQUIS
+# -------------------------------------------------------------------
+#
+# Assurez-vous d'avoir les outils suivants installés sur votre machine :
+#
+# 1. Python (version 3.8 ou supérieure)
+#    - Vérifiez avec : python --version
+#    - Téléchargez sur : https://www.python.org/
+#
+# 2. Node.js (version 18 ou supérieure) et npm
+#    - Vérifiez avec : node --version et npm --version
+#    - Téléchargez sur : https://nodejs.org/
+#
+# ===================================================================
+# ÉTAPE 1 : CONFIGURATION DU BACKEND (FastAPI)
+# ===================================================================
+#
+# Ouvre un terminal et place-toi dans le dossier `application-grosmuscles/FastAPI`.
+#
+# a. Créer un environnement virtuel (fortement recommandé) :
+#    # Cette commande crée un dossier `venv` qui isolera les dépendances du projet.
+#    python -m venv venv
+#
+# b. Activer l'environnement virtuel :
+#    - Sur Windows (cmd/powershell) :
+#      .\venv\Scripts\activate
+#    - Sur macOS / Linux :
+#      source venv/bin/activate
+#    # Une fois activé, votre terminal devrait afficher (venv) au début de la ligne.
+#
+# c. Installer les dépendances Python :
+#    # Installe toutes les librairies nécessaires listées dans requirement.txt.
+#    pip install -r requirement.txt
+#
+# d. Lancer le serveur backend :
+#    # Le serveur sera accessible sur http://localhost:8001
+#    # --reload : redémarre le serveur à chaque modification du code.
+#    # --host 0.0.0.0 : rend le serveur accessible sur votre réseau local (pour l'app mobile).
+#    uvicorn main:app --reload --host 0.0.0.0 --port 8001
+#
+# ⚠️ Laissez ce terminal ouvert. Le backend doit tourner en permanence.
+#
+# ===================================================================
+# ÉTAPE 2 : CONFIGURATION DU FRONTEND (Expo / React Native)
+# ===================================================================
+#
+# Ouvre un SECOND terminal et place-toi dans le dossier `application-grosmuscles/frontend`.
+#
+# a. Installer les dépendances JavaScript :
+#    # Télécharge toutes les librairies listées dans package.json.
+#    npm install
+#
+# b. Lancer l'application :
+#    npx expo start
+#
+#    # Un navigateur s'ouvrira avec une interface Expo. Vous pourrez alors :
+#    # - Scanner le QR code avec l'application "Expo Go" sur votre téléphone.
+#    # - Appuyer sur 'w' pour lancer l'application dans votre navigateur web.
+#
+# ===================================================================
+# NOTES IMPORTANTES
+# ===================================================================
+#
+# - CONNEXION : Le frontend est configuré pour détecter l'IP du backend sur le réseau local.
+#   Assurez-vous que votre téléphone et votre ordinateur sont sur le même réseau Wi-Fi.
+#
+# - MODE TUNNEL : Si la connexion directe via QR code échoue, utilisez le mode "Tunnel" :
+#   npx expo start --tunnel
+#
+# - BASE DE DONNÉES : La BDD (`FastAPI/grosmuscles.db`) est incluse dans Git pour ce MVP.
+#   Elle est créée automatiquement au premier lancement du backend si elle n'existe pas.
+#
+# ===================================================================

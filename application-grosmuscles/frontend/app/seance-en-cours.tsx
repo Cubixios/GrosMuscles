@@ -116,11 +116,23 @@ export default function SeanceEnCours() {
     // Dans une V2, on pourrait afficher une modale pour que l'utilisateur la saisisse.
     const note_fatigue = 7; // Note de fatigue arbitraire (RPE)
 
+    const exercisesData = currentSession.exercises.map(ex => ({
+      ...ex,
+      // On ne garde que les séries complétées et on s'assure que les reps sont des nombres
+      series: ex.series
+        .filter(s => s.isCompleted)
+        .map(s => ({
+          ...s,
+          reps: typeof s.reps === 'string' ? parseInt(s.reps, 10) || 0 : s.reps,
+        })),
+    }));
+
     const donneesSeance = {
       id_user: parseInt(userId, 10),
       nom_seance: currentSession.name,
       duree_totale: Math.round(elapsedSeconds / 60), // L'API attend des minutes
       note_fatigue: note_fatigue,
+      exercises: exercisesData,
     };
 
     try {
@@ -193,9 +205,13 @@ export default function SeanceEnCours() {
 
     const updatedExercises = currentSession.exercises.map((exercise, index) => {
       if (index !== currentIndex) return exercise;
-      const updatedSeries = exercise.series.map((serie) =>
-        serie.id === serieId ? { ...serie, [field]: value } : serie
-      );
+      const updatedSeries = exercise.series.map((serie) => {
+        if (serie.id === serieId) {
+          const updatedValue = (field === 'reps' || field === 'restTime') ? (parseInt(value, 10) || 0) : value;
+          return { ...serie, [field]: updatedValue };
+        }
+        return serie;
+      });
       return { ...exercise, series: updatedSeries };
     });
 

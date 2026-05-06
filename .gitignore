@@ -1,69 +1,48 @@
-# ==========================================
-# .gitignore - Projet GROS MUSCLES
-# ==========================================
+# ============================================================
+# Fichier .gitignore pour le projet GrosMuscles
+# ============================================================
 
-# --- 1. SECRETS & CLÉS D'API (CRUCIAL 🚨) ---
-.env
-.env.local
-.env.*.local
-*.pem
-secrets.json
-
-# --- 2. BASE DE DONNÉES LOCALE ---
-# On ignore les bases SQLite pour que chacun ait sa propre base en local
-# et pour ne pas créer de conflits de fusion (merge conflicts)
-*.db
-*.sqlite
-*.sqlite3
-gros_muscles.db
-
-# --- 3. PYTHON / FASTAPI (BACKEND) ---
-__pycache__/
-*.py[cod]
-*$py.class
-# Environnements virtuels (ne jamais push l'environnement complet !)
-venv/
-env/
-.venv/
-env.bak/
-venv.bak/
-# Logs
-*.log
-
-# --- 4. REACT / REACT NATIVE / EXPO (FRONTEND) ---
-# Dossier ultra-lourd à ne jamais mettre sur Git !
-node_modules/
-# Fichiers générés par Expo et le build
-.expo/
-dist/
-build/
-web-build/
-# Fichiers de log d'erreurs npm/yarn
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.eslintcache
-
-# --- 5. SYSTÈMES D'EXPLOITATION (OS) ---
-# Mac
-.DS_Store
-.AppleDouble
-.LSOverride
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# --- 6. ÉDITEURS DE CODE (IDE) ---
-.vscode/
+# --- Fichiers et dossiers généraux ---
+# Fichiers de configuration des IDEs
 .idea/
+.vscode/
 *.swp
 *.swo
 
-# Environnements virtuels (ne jamais push l'environnement complet !)
-venv/
-env/
-.venv/
-env.bak/
-venv.bak/
+# Fichiers système (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# --- Backend (Python / FastAPI) ---
+# Dossier de l'environnement virtuel
+application-grosmuscles/FastAPI/venv/
+application-grosmuscles/FastAPI/.venv/
+
+# Cache Python
+application-grosmuscles/FastAPI/__pycache__/
+*.pyc
+
+# Fichiers de build et de distribution
+application-grosmuscles/FastAPI/build/
+application-grosmuscles/FastAPI/dist/
+application-grosmuscles/FastAPI/*.egg-info/
+
+# --- Frontend (React Native / Expo) ---
+# Dépendances
+application-grosmuscles/frontend/node_modules/
+
+# Dossiers de build et de cache Expo
+application-grosmuscles/frontend/.expo/
+application-grosmuscles/frontend/web-build/
+application-grosmuscles/frontend/dist/
+
+# Fichiers de log
+application-grosmuscles/frontend/npm-debug.log*
+application-grosmuscles/frontend/yarn-debug.log*
+application-grosmuscles/frontend/yarn-error.log*
+
+
+# --- Base de données ---
+# La base de données SQLite est volontairement NON ignorée pour conserver les données du MVP.
+# Si vous souhaitez l'ignorer, décommentez la ligne suivante :
+# application-grosmuscles/FastAPI/grosmuscles.db

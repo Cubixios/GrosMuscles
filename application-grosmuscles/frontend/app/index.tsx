@@ -29,6 +29,8 @@ interface Seance {
   date_heure: string;
   duree_totale: number;
   note_fatigue: number;
+  total_weight_lifted?: number;
+  pr_count?: number;
 }
 
 export default function Index() {
@@ -90,6 +92,12 @@ export default function Index() {
     return mins > 0 ? `${heures}h${mins}` : `${heures}h`;
   };
 
+  // Formater le poids total
+  const formatWeight = (weight: number) => {
+    if (!weight || weight < 1000) return `${Math.round(weight || 0)} kg`;
+    return `${(weight / 1000).toFixed(1)} t`;
+  };
+
   // Calculer le temps total d'entraînement à partir des séances chargées
   const totalMinutes = seances.reduce((sum, seance) => sum + seance.duree_totale, 0);
 
@@ -98,7 +106,7 @@ export default function Index() {
   }
 
   // Composant pour afficher une seule séance dans la FlatList
-  const renderSeanceCard = ({ item }: { item: any }) => (
+  const renderSeanceCard = ({ item }: { item: Seance }) => (
     <TouchableOpacity style={styles.sessionCard}>
       <View style={styles.sessionLeft}>
         <View style={styles.sessionIconContainer}>
@@ -109,7 +117,7 @@ export default function Index() {
           />
         </View>
         <View>
-          <Text style={styles.sessionName}>{item.nom_seance || 'Séance'}</Text>
+          <Text style={styles.sessionName} numberOfLines={1}>{item.nom_seance || 'Séance'}</Text>
           <Text style={styles.sessionDate}>{formatDate(item.date_heure)}</Text>
         </View>
       </View>
@@ -117,6 +125,16 @@ export default function Index() {
         <View style={styles.statBadge}>
           <Text style={styles.statBadgeText}>⏱ {formatDuration(item.duree_totale)}</Text>
         </View>
+        {typeof item.total_weight_lifted === 'number' && (
+          <View style={styles.statBadge}>
+            <Text style={styles.statBadgeText}>🏋️ {formatWeight(item.total_weight_lifted)}</Text>
+          </View>
+        )}
+        {typeof item.pr_count === 'number' && item.pr_count > 0 && (
+          <View style={styles.statBadge}>
+            <Text style={styles.statBadgeText}>🏆 {item.pr_count} PR</Text>
+          </View>
+        )}
         <View style={styles.statBadge}>
           <Text style={styles.statBadgeText}>💪 Fatigue: {item.note_fatigue}/10</Text>
         </View>
@@ -398,6 +416,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: TEXT_PRIMARY,
+    flexShrink: 1,
   },
   sessionDate: {
     fontSize: 11,
