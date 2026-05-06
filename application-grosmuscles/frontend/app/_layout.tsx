@@ -1,54 +1,43 @@
+import { Stack, useRouter, useSegments } from 'expo-router';
 import React, { useEffect } from 'react';
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, useAuth } from '../lib/AuthContext';
 import { SessionProvider } from '../lib/SessionContext';
 
-/**
- * Ce composant est le gardien de l'application.
- * Il gère la redirection en fonction de l'état d'authentification.
- */
-function RootLayoutNav() {
+// Ce composant "gardien" protège les routes de l'application.
+const AuthGuard = () => {
   const { userId, isLoaded } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    // On attend que le contexte d'authentification soit chargé.
+    // On attend que le statut de connexion soit chargé avant de faire quoi que ce soit.
     if (!isLoaded) return;
 
-    const inAuthGroup = segments.length > 0 && ['inscription', 'login'].includes(segments[0]);
+    const isAuthPage = (segments as string[]).includes('login') || (segments as string[]).includes('inscription');
 
-    if (userId && inAuthGroup) {
-      // L'utilisateur est connecté mais sur une page d'authentification.
+    if (userId && isAuthPage) {
+      // L'utilisateur est connecté mais sur une page d'authentification (login/inscription).
       // On le redirige vers la page d'accueil.
       router.replace('/');
-    } else if (!userId && !inAuthGroup) {
-      // L'utilisateur n'est pas connecté et tente d'accéder à une page protégée.
-      // On le redirige vers l'inscription.
-      router.replace('/inscription');
+    } else if (!userId && !isAuthPage) {
+      // L'utilisateur n'est pas connecté et essaie d'accéder à une page protégée.
+      // On le redirige vers la page de connexion.
+      router.replace('/login');
     }
   }, [userId, isLoaded, segments, router]);
 
-  // Si le contexte n'est pas encore chargé, on n'affiche rien pour éviter les erreurs.
-  if (!isLoaded) {
-    // Affiche un indicateur de chargement au lieu d'un écran vide
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0a0a0a' }}>
-        <ActivityIndicator size="large" color="#b844c7" />
-      </View>
-    );
-  }
+  // Le Stack gère l'affichage des pages une fois la redirection terminée.
+  return <Stack screenOptions={{ headerShown: false }} />;
+};
 
-  // Affiche la page actuelle.
-  return <Slot />;
-}
-
+// C'est le layout racine de toute l'application.
 export default function RootLayout() {
   return (
+    // On enveloppe toute l'application avec les fournisseurs de contexte
+    // pour que la connexion soit accessible partout.
     <AuthProvider>
       <SessionProvider>
-        <RootLayoutNav />
+        <AuthGuard />
       </SessionProvider>
     </AuthProvider>
   );

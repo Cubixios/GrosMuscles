@@ -14,6 +14,7 @@ import { useLocalSearchParams, useRouter, useRootNavigationState } from 'expo-ro
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
 import { getSeancesUtilisateur } from '../services/api';
+import BottomNavBar from '../app/BottomNavBar';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
@@ -36,7 +37,7 @@ interface Seance {
 export default function Index() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { userId, setUserId, userName } = useAuth();
+  const { userId, userName, logout } = useAuth();
   const [seances, setSeances] = useState<Seance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +55,21 @@ export default function Index() {
       setError(null);
       const data = await getSeancesUtilisateur(parseInt(uid, 10));
       setSeances(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erreur lors du chargement des séances:', err);
-      setError('Erreur lors du chargement des séances');
+
+      // Si l'erreur est une 404, cela signifie que l'utilisateur n'existe plus en BDD.
+      // C'est un signe que la session locale est invalide. On déconnecte l'utilisateur.
+      if (err.message && err.message.includes('404')) {
+        setError("Votre session a expiré. Redirection vers la page de connexion...");
+        // On attend un peu avant de déconnecter pour que l'utilisateur voie le message.
+        setTimeout(() => {
+          logout();
+        }, 2500);
+      } else {
+        // Pour les autres erreurs (réseau, etc.)
+        setError(`Erreur de chargement : ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -247,37 +260,7 @@ export default function Index() {
         <View style={styles.spacer} />
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="home" size={24} color={PURPLE} />
-          <Text style={[styles.navLabel, { color: PURPLE }]}>Accueil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/routines')}>
-          <MaterialCommunityIcons
-            name="dumbbell"
-            size={24}
-            color={TEXT_SECONDARY}
-          />
-          <Text style={styles.navLabel}>Routines</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/analyses')}>
-          <MaterialCommunityIcons
-            name="chart-bar"
-            size={24}
-            color={TEXT_SECONDARY}
-          />
-          <Text style={styles.navLabel}>Analyses</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/profile')}>
-          <MaterialCommunityIcons
-            name="account-outline"
-            size={24}
-            color={TEXT_SECONDARY}
-          />
-          <Text style={styles.navLabel}>Profil</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavBar activeScreen="accueil" />
     </SafeAreaView>
   );
 }
@@ -478,27 +461,5 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 80,
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgba(20, 20, 20, 0.6)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(77, 77, 77, 0.2)',
-    paddingBottom: 12,
-    paddingTop: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 8,
-  },
-  navLabel: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    color: TEXT_SECONDARY,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
   },
 });

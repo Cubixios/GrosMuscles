@@ -420,25 +420,6 @@ export default function SeanceEnCours() {
             />
           </TouchableOpacity>
         </View>
-
-        <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
-            <MaterialCommunityIcons name="home-outline" size={24} color={TEXT_SECONDARY} />
-            <Text style={styles.navText}>Accueil</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/routines')}>
-            <MaterialCommunityIcons name="dumbbell" size={24} color={TEXT_SECONDARY} />
-            <Text style={styles.navText}>Routines</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/analyses')}>
-            <MaterialCommunityIcons name="chart-bar" size={24} color={TEXT_SECONDARY} />
-            <Text style={styles.navText}>Analyses</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/profile')}>
-            <MaterialCommunityIcons name="account-outline" size={24} color={TEXT_SECONDARY} />
-            <Text style={styles.navText}>Profil</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -827,27 +808,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 12,
     letterSpacing: 1,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'rgba(20, 20, 20, 0.6)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(77, 77, 77, 0.2)',
-    paddingBottom: 12,
-    paddingTop: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  navText: {
-    color: TEXT_SECONDARY,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
   },
   emptyState: {
     flex: 1,

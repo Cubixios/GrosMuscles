@@ -1,128 +1,80 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import BottomNavBar from '../app/BottomNavBar';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
+const SURFACE_CONTAINER = '#141414';
 const TEXT_PRIMARY = '#f9f9fd';
 const TEXT_SECONDARY = '#a1a1a1';
 
 export default function Analyses() {
-  const router = useRouter();
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={TEXT_PRIMARY} />
-        </TouchableOpacity>
-        <Text style={styles.title}>ANALYSES</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.placeholder}>
-          Page des analyses en construction...
-        </Text>
-      </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/')}
-        >
-          <MaterialCommunityIcons
-            name="home-outline"
-            size={24}
-            color={TEXT_SECONDARY}
-          />
-          <Text style={styles.navLabel}>Accueil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/routines')}>
-          <MaterialCommunityIcons name="dumbbell" size={24} color={TEXT_SECONDARY} />
-          <Text style={styles.navLabel}>Routines</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="chart-bar" size={24} color={PURPLE} />
-          <Text style={[styles.navLabel, { color: PURPLE }]}>Analyses</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/profile')}
-        >
-          <MaterialCommunityIcons
-            name="account-outline"
-            size={24}
-            color={TEXT_SECONDARY}
-          />
-          <Text style={styles.navLabel}>Profil</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Analyses & Progrès</Text>
+        </View>
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.placeholderCard}>
+            <MaterialCommunityIcons name="chart-gantt" size={48} color={PURPLE} />
+            <Text style={styles.placeholderTitle}>Graphiques de progression</Text>
+            <Text style={styles.placeholderSubtitle}>
+              Cette section affichera bientôt des graphiques détaillés sur votre volume, votre poids soulevé et vos records personnels.
+            </Text>
+          </View>
+          <View style={styles.placeholderCard}>
+            <MaterialCommunityIcons name="calendar-check" size={48} color={PURPLE} />
+            <Text style={styles.placeholderTitle}>Calendrier d'activité</Text>
+            <Text style={styles.placeholderSubtitle}>
+              Visualisez votre régularité et les groupes musculaires travaillés au fil du temps.
+            </Text>
+          </View>
+        </ScrollView>
+        <BottomNavBar activeScreen="analyses" />
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: DARK_BG,
-  },
+  safeArea: { flex: 1, backgroundColor: DARK_BG },
+  container: { flex: 1, },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 20,
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(20, 20, 20, 0.6)',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(77, 77, 77, 0.2)',
+    borderBottomColor: 'rgba(184,68,199,0.15)',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  headerTitle: {
     color: TEXT_PRIMARY,
-    letterSpacing: 1.5,
+    fontSize: 22,
+    fontWeight: 'bold',
   },
   content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    padding: 16,
   },
-  placeholder: {
-    fontSize: 16,
-    color: TEXT_SECONDARY,
-    textAlign: 'center',
-    marginTop: 50,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgba(20, 20, 20, 0.6)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(77, 77, 77, 0.2)',
-    paddingBottom: 12,
-    paddingTop: 8,
-  },
-  navItem: {
+  placeholderCard: {
+    backgroundColor: SURFACE_CONTAINER,
+    borderRadius: 12,
+    padding: 24,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#333333',
   },
-  navLabel: {
-    fontSize: 9,
+  placeholderTitle: {
+    color: TEXT_PRIMARY,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  placeholderSubtitle: {
     color: TEXT_SECONDARY,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

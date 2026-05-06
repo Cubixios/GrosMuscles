@@ -79,6 +79,23 @@
 #   Elle est créée automatiquement au premier lancement du backend si elle n'existe pas.
 #
 # ===================================================================
+#
+# ===================================================================
+# DÉPANNAGE
+# ===================================================================
+#
+# Problème : Le backend affiche une erreur `no such column: ...` dans les logs.
+#
+# Cause : Le code Python a été mis à jour (ex: ajout d'un champ dans un modèle de données) 
+# mais le fichier de la base de données (`grosmuscles.db`) n'a pas été mis à jour.
+#
+# Solution (simple, mais destructive) :
+# 1. Arrêtez le serveur backend.
+# 2. Supprimez le fichier `application-grosmuscles/FastAPI/grosmuscles.db`.
+# 3. Relancez le serveur backend. Une nouvelle base de données sera créée avec la bonne structure.
+#
+# ⚠️ Attention : Cette opération efface toutes les données existantes.
+# ===================================================================
 # Compte de connexion
 #
 #  mail : mathys@gmail.command
