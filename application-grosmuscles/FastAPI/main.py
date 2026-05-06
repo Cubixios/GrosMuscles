@@ -2,9 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated, Optional
-from sqlalchemy.orm import Session # Correction de l'import ici
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel, EmailStr
-from passlib.context import CryptContext
 import datetime
 import models
 from database import SessionLocal, engine
@@ -20,9 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# --- Sécurité : Hachage des mots de passe ---
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # --- Schémas Pydantic ---
 class UserCreate(BaseModel):
@@ -71,13 +67,16 @@ models.Base.metadata.create_all(bind=engine)
 # --- ÉTAPE 1 : Créer un compte ---
 @app.post("/api/utilisateurs")
 def creer_compte(user: UserCreate, db: db_dependency):
-    existing_user = db.query(models.Utilisateur).filter(models.Utilisateur.email == user.email).first()
+    # On normalise l'e-mail en minuscules pour assurer la cohérence
+    email_lower = user.email.lower()
+    existing_user = db.query(models.Utilisateur).filter(models.Utilisateur.email == email_lower).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Cette adresse e-mail est déjà utilisée.")
 
     new_user = models.Utilisateur(
         nom=user.nom,
-        email=user.email,
+        # On sauvegarde l'e-mail en minuscules
+        email=email_lower,
         environnement=user.environnement or "",
     )
     db.add(new_user)
@@ -85,7 +84,7 @@ def creer_compte(user: UserCreate, db: db_dependency):
 
     credentials = models.CredentialUtilisateur(
         id_user=new_user.id_user,
-        mot_de_passe=pwd_context.hash(user.password), # On hashe le mot de passe
+        mot_de_passe=user.password, # ATTENTION: Mot de passe en clair pour simplifier le MVP
     )
     db.add(credentials)
     db.commit() # Commit atomique : l'utilisateur et ses credentials sont sauvegardés en même temps.
@@ -96,21 +95,20 @@ def creer_compte(user: UserCreate, db: db_dependency):
 
 @app.post("/api/login")
 def login(credentials: UserLogin, db: db_dependency):
-    print(f"Tentative de connexion pour l'email : {credentials.email}")
-    user = db.query(models.Utilisateur).filter(models.Utilisateur.email == credentials.email).first()
-    if not user:
-        print("Échec : Utilisateur non trouvé dans la base de données.")
-        raise HTTPException(status_code=401, detail="Identifiants invalides.")
-
-    print(f"Succès : Utilisateur trouvé, ID: {user.id_user}")
-    auth = db.query(models.CredentialUtilisateur).filter(models.CredentialUtilisateur.id_user == user.id_user).first()
+    # On normalise aussi l'e-mail ici pour la recherche
+    email_lower = credentials.email.lower()
+    print(f"Tentative de connexion pour l'email : {email_lower}")
     
-    if not auth:
-        print(f"Échec : Aucune information d'authentification trouvée pour l'utilisateur ID: {user.id_user}")
+    # On utilise un JOIN pour récupérer l'utilisateur et ses credentials en une seule requête
+    user = db.query(models.Utilisateur).options(joinedload(models.Utilisateur.credential)).filter(models.Utilisateur.email == email_lower).first()
+
+    # Si l'utilisateur n'est pas trouvé, ou s'il n'a pas de credentials, on rejette.
+    if not user or not user.credential:
+        print("Échec : Utilisateur ou informations d'authentification non trouvés.")
         raise HTTPException(status_code=401, detail="Identifiants invalides.")
 
-    # On vérifie le mot de passe hashé
-    password_is_valid = pwd_context.verify(credentials.password, auth.mot_de_passe)
+    # ATTENTION: On compare le mot de passe en clair pour simplifier le MVP
+    password_is_valid = credentials.password == user.credential.mot_de_passe
     if not password_is_valid:
         print(f"Échec : Le mot de passe est incorrect pour l'utilisateur ID: {user.id_user}")
         raise HTTPException(status_code=401, detail="Identifiants invalides.")

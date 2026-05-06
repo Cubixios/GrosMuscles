@@ -1,16 +1,26 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-// =================================================================================
-// SOLUTION ROBUSTE POUR LE DÉVELOPPEMENT LOCAL (WEB & MOBILE)
-//
-// 1. Pour le mobile (Android/iOS), on utilise l'IP locale du PC.
-const MOBILE_HOST = '192.168.1.36'; // <--- VÉRIFIEZ QUE C'EST TOUJOURS VOTRE IP LOCALE
-// 2. Pour le web, on utilise 'localhost' car le navigateur et le serveur sont sur la même machine.
-const WEB_HOST = 'localhost';
-const BACKEND_HOST = Platform.OS === 'web' ? WEB_HOST : MOBILE_HOST;
-// =================================================================================
- 
+// ======================================================================================
+// DÉTECTION AUTOMATIQUE DE L'ADRESSE DU BACKEND
+// Ceci rend la connexion beaucoup plus fiable en développement local.
+// Plus besoin de changer l'IP manuellement !
+// ======================================================================================
+const getBackendHost = () => {
+  // Pour le web, le serveur tourne sur la même machine.
+  if (Platform.OS === 'web') {
+    return 'localhost';
+  }
+
+  // Pour le mobile, on récupère l'adresse de l'ordinateur qui lance Expo.
+  // L'adresse est souvent '192.168.1.XX:19000', on ne veut que la partie IP.
+  const hostUri = Constants.expoConfig?.hostUri;
+  const ip = hostUri ? hostUri.split(':')[0] : '192.168.1.36'; // Fallback au cas où
+  console.log(`[API] Connexion au backend sur : ${ip}`);
+  return ip;
+};
+
+const BACKEND_HOST = getBackendHost();
 const BACKEND_PORT = 8001; // Port mis à jour pour correspondre au backend
 const BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 

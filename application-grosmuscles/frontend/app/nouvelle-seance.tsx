@@ -729,9 +729,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 18,
+    // @ts-ignore: boxShadow for web
+    boxShadow: '0 8px 18px rgba(0, 0, 0, 0.25)',
     elevation: 8,
   },
   floatingLabel: {

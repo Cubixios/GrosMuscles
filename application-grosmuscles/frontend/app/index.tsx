@@ -22,11 +22,20 @@ const TEXT_PRIMARY = '#f9f9fd';
 const TEXT_SECONDARY = '#a1a1a1';
 const OUTLINE = '#333333';
 
+// Définissons un type pour nos séances pour plus de clarté et de sécurité
+interface Seance {
+  id_realise: number;
+  nom_seance: string;
+  date_heure: string;
+  duree_totale: number;
+  note_fatigue: number;
+}
+
 export default function Index() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const { userId, setUserId, userName } = useAuth();
-  const [seances, setSeances] = useState<any[]>([]);
+  const [seances, setSeances] = useState<Seance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,6 +89,9 @@ export default function Index() {
     const mins = minutes % 60;
     return mins > 0 ? `${heures}h${mins}` : `${heures}h`;
   };
+
+  // Calculer le temps total d'entraînement à partir des séances chargées
+  const totalMinutes = seances.reduce((sum, seance) => sum + seance.duree_totale, 0);
 
   if (!userId) {
     return <View style={styles.container} />;
@@ -163,8 +175,8 @@ export default function Index() {
             <Text style={styles.statLabel}>Routines</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>42h</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statNumber}>{formatDuration(totalMinutes)}</Text>
+            <Text style={styles.statLabel}>Temps Total</Text>
           </View>
         </View>
 

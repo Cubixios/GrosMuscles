@@ -174,10 +174,8 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: 'rgba(184,68,199,0.15)',
-    shadowColor: '#b844c7',
-    shadowOffset: { width: 0, height: 18 },
-    shadowOpacity: 0.12,
-    shadowRadius: 40,
+    // @ts-ignore: boxShadow for web
+    boxShadow: '0 18px 40px rgba(184, 68, 199, 0.12)',
     elevation: 12,
   },
   title: {

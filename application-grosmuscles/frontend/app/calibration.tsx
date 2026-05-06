@@ -511,10 +511,8 @@ const styles = StyleSheet.create({
   goalSelected: {
     backgroundColor: 'rgba(184,68,199,0.1)',
     borderColor: '#b844c7',
-    shadowColor: '#b844c7',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    // @ts-ignore: boxShadow for web
+    boxShadow: '0 0 20px rgba(184, 68, 199, 0.1)',
     elevation: 5,
   },
   goalIcon: {
@@ -551,10 +549,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(184,68,199,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#b844c7',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 30,
+    // @ts-ignore: boxShadow for web
+    boxShadow: '0 0 30px rgba(184, 68, 199, 0.2)',
     elevation: 5,
   },
   aiIconText: {
@@ -594,10 +590,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 12,
-    shadowColor: '#b844c7',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 40,
+    // @ts-ignore: boxShadow for web
+    boxShadow: '0 10px 40px rgba(184, 68, 199, 0.25)',
     elevation: 10,
   },
   primaryButtonText: {
