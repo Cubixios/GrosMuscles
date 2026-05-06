@@ -79,3 +79,8 @@
 #   Elle est créée automatiquement au premier lancement du backend si elle n'existe pas.
 #
 # ===================================================================
+# Compte de connexion
+#
+#  mail : mathys@gmail.command
+#  mdp : AZERTY12345
+#
