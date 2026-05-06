@@ -7,6 +7,7 @@ interface Serie {
   reps: number;
   weight: number;
   restTime: number;
+  isCompleted: boolean;
 }
 
 interface Exercise {

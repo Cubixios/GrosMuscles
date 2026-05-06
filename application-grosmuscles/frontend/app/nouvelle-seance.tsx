@@ -28,10 +28,10 @@ const suggestedExercises = [
     active: false,
     icon: 'fitness-center',
     series: [
-      { id: '1', reps: 10, weight: '80 kg', restTime: 90 },
-      { id: '2', reps: 10, weight: '80 kg', restTime: 90 },
-      { id: '3', reps: 8, weight: '85 kg', restTime: 90 },
-      { id: '4', reps: 6, weight: '90 kg', restTime: 120 },
+      { id: '1', reps: 10, weight: '80 kg', restTime: 90, isCompleted: false },
+      { id: '2', reps: 10, weight: '80 kg', restTime: 90, isCompleted: false },
+      { id: '3', reps: 8, weight: '85 kg', restTime: 90, isCompleted: false },
+      { id: '4', reps: 6, weight: '90 kg', restTime: 120, isCompleted: false },
     ],
   },
   {
@@ -42,10 +42,10 @@ const suggestedExercises = [
     active: false,
     icon: 'straighten',
     series: [
-      { id: '1', reps: 8, weight: '100 kg', restTime: 120 },
-      { id: '2', reps: 8, weight: '100 kg', restTime: 120 },
-      { id: '3', reps: 6, weight: '110 kg', restTime: 150 },
-      { id: '4', reps: 4, weight: '120 kg', restTime: 180 },
+      { id: '1', reps: 8, weight: '100 kg', restTime: 120, isCompleted: false },
+      { id: '2', reps: 8, weight: '100 kg', restTime: 120, isCompleted: false },
+      { id: '3', reps: 6, weight: '110 kg', restTime: 150, isCompleted: false },
+      { id: '4', reps: 4, weight: '120 kg', restTime: 180, isCompleted: false },
     ],
   },
   {
@@ -56,9 +56,9 @@ const suggestedExercises = [
     active: true,
     icon: 'accessibility-new',
     series: [
-      { id: '1', reps: 8, weight: 'Corps', restTime: 90 },
-      { id: '2', reps: 8, weight: 'Corps', restTime: 90 },
-      { id: '3', reps: 6, weight: 'Corps', restTime: 120 },
+      { id: '1', reps: 8, weight: 'Corps', restTime: 90, isCompleted: false },
+      { id: '2', reps: 8, weight: 'Corps', restTime: 90, isCompleted: false },
+      { id: '3', reps: 6, weight: 'Corps', restTime: 120, isCompleted: false },
     ],
   },
   {
@@ -69,9 +69,9 @@ const suggestedExercises = [
     active: false,
     icon: 'fitness-center',
     series: [
-      { id: '1', reps: 12, weight: '16 kg', restTime: 60 },
-      { id: '2', reps: 12, weight: '16 kg', restTime: 60 },
-      { id: '3', reps: 10, weight: '18 kg', restTime: 60 },
+      { id: '1', reps: 12, weight: '16 kg', restTime: 60, isCompleted: false },
+      { id: '2', reps: 12, weight: '16 kg', restTime: 60, isCompleted: false },
+      { id: '3', reps: 10, weight: '18 kg', restTime: 60, isCompleted: false },
     ],
   },
 ];
@@ -128,6 +128,7 @@ export default function NouvelleSeance() {
       reps: 10,
       weight: '0 kg',
       restTime: 90,
+      isCompleted: false,
     };
     setCurrentSeries([...currentSeries, newSerie]);
   };

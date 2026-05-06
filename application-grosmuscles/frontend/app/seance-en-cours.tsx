@@ -1,21 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSession } from '../lib/SessionContext';
+import { useSession, Serie } from '../lib/SessionContext';
+import { useAuth } from '../lib/AuthContext';
+import { validerSeanceAPI } from '../services/api';
 
 const PURPLE = '#b844c7';
 const DARK_BG = '#0a0a0a';
 const SURFACE_CONTAINER = '#141414';
 const TEXT_PRIMARY = '#f9f9fd';
 const TEXT_SECONDARY = '#a1a1a1';
+const GREEN_VALID = '#4CAF50';
 
 export default function SeanceEnCours() {
   const router = useRouter();
-  const { currentSession, clearSession } = useSession();
+  const { currentSession, setCurrentSession, clearSession } = useSession();
+  const { userId } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false); // Ajout de l'état de chargement pour la finalisation
+  const [activeRestTimer, setActiveRestTimer] = useState<{ serieId: string; timeLeft: number } | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const exercises = currentSession?.exercises ?? [];
 
@@ -36,8 +42,27 @@ export default function SeanceEnCours() {
 
   useEffect(() => {
     setCurrentIndex(0);
-    setIsRunning(true);
-  }, [currentSession]);
+    // On ne veut démarrer le chrono et initialiser l'index que lorsqu'une NOUVELLE session est chargée.
+    if (currentSession) {
+      setIsRunning(true);
+    }
+  }, [currentSession?.id]); // Dépendre de l'ID de la session, pas de l'objet entier.
+
+  // Logique pour le décompte du temps de repos
+  useEffect(() => {
+    if (activeRestTimer && activeRestTimer.timeLeft > 0) {
+      const timer = setInterval(() => {
+        setActiveRestTimer(prev => {
+          if (prev && prev.timeLeft > 1) {
+            return { ...prev, timeLeft: prev.timeLeft - 1 };
+          }
+          clearInterval(timer);
+          return null; // Le temps de repos est terminé
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [activeRestTimer]);
 
   const currentExercise = exercises[currentIndex];
 
@@ -76,10 +101,50 @@ export default function SeanceEnCours() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (isFinishing) return; // Empêcher les clics multiples pendant le chargement
+    setIsFinishing(true);
     setIsRunning(false);
-    clearSession();
-    router.push('/');
+
+    if (!currentSession || !userId) {
+      Alert.alert("Erreur", "Impossible de terminer la séance, données de session ou utilisateur manquantes.");
+      setIsFinishing(false);
+      return;
+    }
+
+    // Pour le MVP, on utilise une valeur de fatigue fixe.
+    // Dans une V2, on pourrait afficher une modale pour que l'utilisateur la saisisse.
+    const note_fatigue = 7; // Note de fatigue arbitraire (RPE)
+
+    const donneesSeance = {
+      id_user: parseInt(userId, 10),
+      nom_seance: currentSession.name,
+      duree_totale: Math.round(elapsedSeconds / 60), // L'API attend des minutes
+      note_fatigue: note_fatigue,
+    };
+
+    try {
+      console.log("Tentative d'enregistrement de la séance...");
+      const reponse = await validerSeanceAPI(donneesSeance);
+
+      // On vérifie que la réponse est valide AVANT de l'utiliser
+      // Le bouton affiche "Séance enregistrée...", on attend un peu pour que l'utilisateur le voie, puis on redirige.
+      console.log("Séance enregistrée avec succès, redirection en cours...");
+      setTimeout(() => {
+        clearSession();
+        router.push('/');
+      }, 1500); // Laisse 1.5s pour voir le message sur le bouton
+
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde de la séance:", error);
+      const errorMessage = error instanceof Error ? error.message : "Une erreur inconnue est survenue.";
+      // On propose à l'utilisateur de réessayer, sans perdre sa progression
+      Alert.alert("Erreur de sauvegarde", `La connexion avec le serveur a échoué : ${errorMessage}. Voulez-vous réessayer ?`, [
+        { text: "Annuler", style: "cancel", onPress: () => setIsRunning(true) }, // On peut relancer le chrono si on annule
+        { text: "Réessayer", onPress: () => handleFinish() } // On relance la même fonction
+      ]);
+      setIsFinishing(false); // On réinitialise seulement en cas d'erreur
+    }
   };
 
   const generateAIAdvice = () => {
@@ -93,6 +158,50 @@ export default function SeanceEnCours() {
       return '✅ Presque terminé ! Super session !';
     }
   };
+
+  const handleToggleSerieCompletion = (serieId: string) => {
+    if (!currentSession) return;
+
+    let targetSerie: Serie | undefined;
+
+    const updatedExercises = currentSession.exercises.map((exercise, index) => {
+      if (index !== currentIndex) return exercise;
+      const updatedSeries = exercise.series.map((serie) => {
+        if (serie.id === serieId) {
+          const newSerieState = !serie.isCompleted;
+          if (newSerieState) { // Si on vient de cocher la case
+            targetSerie = serie;
+          }
+          return { ...serie, isCompleted: newSerieState };
+        }
+        return serie;
+      });
+      return { ...exercise, series: updatedSeries };
+    });
+
+    setCurrentSession({ ...currentSession, exercises: updatedExercises });
+
+    if (targetSerie) {
+      setActiveRestTimer({ serieId: targetSerie.id, timeLeft: targetSerie.restTime });
+    } else if (activeRestTimer?.serieId === serieId) {
+      setActiveRestTimer(null); // Si on décoche, on arrête le timer
+    }
+  };
+
+  const handleSerieUpdate = (serieId: string, field: keyof Serie, value: string) => {
+    if (!currentSession) return;
+
+    const updatedExercises = currentSession.exercises.map((exercise, index) => {
+      if (index !== currentIndex) return exercise;
+      const updatedSeries = exercise.series.map((serie) =>
+        serie.id === serieId ? { ...serie, [field]: value } : serie
+      );
+      return { ...exercise, series: updatedSeries };
+    });
+
+    setCurrentSession({ ...currentSession, exercises: updatedExercises });
+  };
+
 
   if (!currentSession || exercises.length === 0) {
     return (
@@ -170,23 +279,54 @@ export default function SeanceEnCours() {
           <View style={styles.seriesSection}>
             <Text style={styles.seriesSectionTitle}>Séries de cet exercice</Text>
             {currentExercise.series.map((serie, index) => (
-              <View key={serie.id} style={styles.serieCard}>
-                <View style={styles.serieHeader}>
+              <View key={serie.id} style={[styles.serieCard, serie.isCompleted && styles.serieCardCompleted]}>
+                <TouchableOpacity
+                  style={styles.completionButton}
+                  onPress={() => handleToggleSerieCompletion(serie.id)}
+                >
+                  <MaterialCommunityIcons
+                    name={serie.isCompleted ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
+                    size={28}
+                    color={serie.isCompleted ? GREEN_VALID : PURPLE}
+                  />
+                </TouchableOpacity>
+
+                <View style={styles.serieContent}>
                   <View style={styles.serieBadge}>
                     <Text style={styles.serieBadgeText}>S{index + 1}</Text>
                   </View>
-                  <View style={styles.serieInfo}>
-                    <Text style={styles.serieDetail}>
-                      <Text style={styles.serieLabel}>Reps:</Text> {serie.reps}
-                    </Text>
-                    <Text style={styles.serieDetail}>
-                      <Text style={styles.serieLabel}>Poids:</Text> {serie.weight}
-                    </Text>
+                  <View style={styles.serieInputs}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Reps</Text>
+                      <TextInput
+                        style={styles.serieInput}
+                        value={serie.reps.toString()}
+                        onChangeText={(text) => handleSerieUpdate(serie.id, 'reps', text)}
+                        keyboardType="numeric"
+                        placeholder="0"
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Poids</Text>
+                      <TextInput
+                        style={styles.serieInput}
+                        value={serie.weight.toString()}
+                        onChangeText={(text) => handleSerieUpdate(serie.id, 'weight', text)}
+                        placeholder="0 kg"
+                      />
+                    </View>
                   </View>
-                  <View style={styles.restTimeBadge}>
-                    <MaterialCommunityIcons name="timer" size={14} color="#ffdbf2" />
-                    <Text style={styles.restTimeText}>{serie.restTime}s</Text>
-                  </View>
+                  {activeRestTimer && activeRestTimer.serieId === serie.id ? (
+                    <View style={[styles.restTimeBadge, styles.restTimeBadgeActive]}>
+                      <ActivityIndicator size="small" color={PURPLE} />
+                      <Text style={[styles.restTimeText, styles.restTimeTextActive]}>{activeRestTimer.timeLeft}s</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.restTimeBadge}>
+                      <MaterialCommunityIcons name="timer" size={14} color="#ffdbf2" />
+                      <Text style={styles.restTimeText}>{serie.restTime}s</Text>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -239,8 +379,14 @@ export default function SeanceEnCours() {
             <Text style={[styles.actionText, currentIndex === 0 && styles.actionTextDisabled]}>Précédent</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.finishButton} onPress={handleFinish}>
-            <Text style={styles.finishText}>Terminer la séance</Text>
+          <TouchableOpacity
+            style={[styles.finishButton, isFinishing && styles.actionButtonDisabled]}
+            onPress={handleFinish}
+            disabled={isFinishing}
+          >
+            <Text style={styles.finishText}>
+              {isFinishing ? "SÉANCE ENREGISTRÉE..." : "TERMINER LA SÉANCE"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -450,11 +596,22 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: 'rgba(244,129,255,0.1)',
-  },
-  serieHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+  },
+  serieCardCompleted: {
+    backgroundColor: '#1a1a1a',
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+  },
+  completionButton: {
+    padding: 4,
+  },
+  serieContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   serieBadge: {
     backgroundColor: '#f481ff',
@@ -469,18 +626,34 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontSize: 12,
   },
-  serieInfo: {
+  serieInputs: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  inputGroup: {
     flex: 1,
   },
-  serieDetail: {
-    color: TEXT_PRIMARY,
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  serieLabel: {
+  inputLabel: {
     color: '#cd9cbf',
     fontWeight: '700',
+    fontSize: 10,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  serieInput: {
+    backgroundColor: '#30092b',
+    color: '#f481ff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 13,
+    fontWeight: '700',
+    borderWidth: 1,
+    borderColor: 'rgba(244,129,255,0.2)',
+    textAlign: 'center',
   },
   restTimeBadge: {
     flexDirection: 'row',
@@ -490,6 +663,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
+  },
+  restTimeBadgeActive: {
+    backgroundColor: '#f481ff',
+    borderColor: '#f481ff',
+    borderWidth: 1,
+  },
+  restTimeTextActive: {
+    color: '#1c0021',
   },
   restTimeText: {
     color: '#ffdbf2',
@@ -629,6 +810,7 @@ const styles = StyleSheet.create({
     color: '#1c0021',
     fontWeight: '800',
     fontSize: 12,
+    letterSpacing: 1,
   },
   bottomNav: {
     flexDirection: 'row',

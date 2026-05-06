@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, useAuth } from '../lib/AuthContext';
 import { SessionProvider } from '../lib/SessionContext';
 
@@ -31,7 +32,12 @@ function RootLayoutNav() {
 
   // Si le contexte n'est pas encore chargé, on n'affiche rien pour éviter les erreurs.
   if (!isLoaded) {
-    return null;
+    // Affiche un indicateur de chargement au lieu d'un écran vide
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0a0a0a' }}>
+        <ActivityIndicator size="large" color="#b844c7" />
+      </View>
+    );
   }
 
   // Affiche la page actuelle.
